@@ -67,6 +67,7 @@ app.get('/health', (req: Request, res: Response) => {
 // 404 handler — catches unmatched routes before they fall through to errorHandler
 app.use((req: Request, res: Response) => {
   res.status(404).json({ ok: false, message: `Route not found: ${req.originalUrl}` });
+//   return;
 });
 
 app.use(errorHandler);

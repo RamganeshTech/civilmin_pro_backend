@@ -21,6 +21,8 @@ export interface IUser extends Document {
   phoneNo?: string;
   profileImage: IUpload | null
   isActive: boolean
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,14 +56,17 @@ const userSchema = new Schema<IUser>(
     profileImage: {
       type: uploadSchema, default: null
     },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    // inside userSchema fields
+    resetPasswordToken: { type: String, select: false },
+    resetPasswordExpires: { type: Date, select: false },
   },
   { timestamps: true }
 );
 
 
 
-userSchema.index({ organizationId: 1 , email: 1})
+userSchema.index({ organizationId: 1, email: 1 })
 
 const UserModel = model("UserModel", userSchema);
 

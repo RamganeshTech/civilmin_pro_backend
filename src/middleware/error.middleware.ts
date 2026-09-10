@@ -9,7 +9,7 @@ export const errorHandler = (
 ): void => {
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({
-      success: false,
+      ok: false,
       message: err.message,
     });
     return;
@@ -18,7 +18,7 @@ export const errorHandler = (
   // Unexpected errors — don't leak details to client
   console.error("Unexpected Error:", err);
   res.status(500).json({
-    success: false,
+    ok: false,
     message: "Internal server error",
   });
 };

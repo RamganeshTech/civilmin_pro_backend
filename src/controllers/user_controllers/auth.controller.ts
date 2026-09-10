@@ -15,8 +15,8 @@ export const register = async (
             return;
         }
 
-        if(!organizationId){
-             res.status(400).json({ ok: false, message: "organizationId field is required" });
+        if (!organizationId) {
+            res.status(400).json({ ok: false, message: "organizationId field is required" });
             return;
         }
 
@@ -52,8 +52,32 @@ export const login = async (
         })
         // res.cookie(specificRefreshKey, refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 7 });
 
-
         res.status(200).json({ ok: true, token, data: user });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getAllUsers = async (
+    req: RoleBasedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { organizationId } = req.user!;
+        const { email, phoneNo, role, userName, isActive, page, limit } = req.query;
+
+        const result = await authService.getAllUsers(organizationId, {
+            email,
+            phoneNo,
+            role,
+            userName,
+            isActive: isActive === undefined ? undefined : isActive === "true",
+            page: page ? Number(page) : undefined,
+            limit: limit ? Number(limit) : undefined,
+        });
+
+        res.status(200).json({ ok: true, data: result });
     } catch (error) {
         next(error);
     }
@@ -65,7 +89,17 @@ export const getMe = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        res.status(200).json({ ok: true, data: req.user });
+        const { userId } = req.params
+
+
+        if (!userId) {
+            res.status(400).json({ ok: false, message: "userId is required" });
+            return;
+        }
+
+        const user = await authService.getByUserId(userId);
+
+        res.status(200).json({ ok: true, data: user });
     } catch (error) {
         next(error);
     }
@@ -91,3 +125,64 @@ export const logout = (
     }
 
 };
+
+
+
+export const forgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            res.status(400).json({ ok: false, message: "Email is required" });
+            return;
+        }
+
+        await authService.forgotPassword(email);
+
+        // Always generic — don't reveal whether the email exists
+        res.status(200).json({
+            ok: true,
+            message: "If that email is registered, a reset link has been sent",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetPassword = async (
+    req: RoleBasedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { userId, token } = req.params;
+        const { password } = req.body;
+
+
+        if (!userId) {
+            res.status(400).json({ ok: false, message: "userId is required" });
+            return;
+        }
+
+        if (!token) {
+            res.status(400).json({ ok: false, message: "token is missing, either generate one another reset password link and try resetting the password" });
+            return;
+        }
+
+        if (!password) {
+            res.status(400).json({ ok: false, message: "New password is required" });
+            return;
+        }
+
+        await authService.resetPassword(userId, token, password);
+
+        res.status(200).json({ ok: true, message: "Password reset successful" });
+    } catch (error) {
+        next(error);
+    }
+};
+
