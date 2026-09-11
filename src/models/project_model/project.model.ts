@@ -22,6 +22,7 @@ export interface IProject extends Document {
   organizationId: Types.ObjectId;
 
   // Basic Info
+  projectName: string
   projectCode: string; // auto-generated
   projectType: IProjectType;
   clientName: string;
@@ -81,7 +82,8 @@ const projectSchema = new Schema<IProject>(
       required: true,
     },
 
-    projectCode: { type: String, required: true, trim: true },
+    projectName: {type:String, required: true, trim:true},
+    projectCode: { type: String, trim: true },
     projectType: {
       type: String,
       enum: ["Residential", "Commercial", "Villa", "Renovation", "Apartment"],
@@ -139,11 +141,15 @@ projectSchema.pre("save", async function (this: IProject) {
   const currentYear = new Date().getFullYear();
   const prefix = `PR-${currentYear}-`;
 
-  const lastProject = await ProjectModel.findOne({
+  // Use this.constructor instead of the closed-over ProjectModel —
+  // avoids relying on module init order and resolves correctly for discriminators
+  const ProjectModelRef = this.constructor as mongoose.Model<IProject>;
+
+  const lastProject = await ProjectModelRef.findOne({
     organizationId: this.organizationId,
     projectCode: { $regex: `^${prefix}` },
   })
-    .sort({ createdAt: -1 }) // sort by creation time, not projectCode string (avoids "999" > "1000" bug)
+    .sort({ createdAt: -1 })
     .select("projectCode")
     .lean();
 
@@ -159,8 +165,7 @@ projectSchema.pre("save", async function (this: IProject) {
   this.projectCode = `${prefix}${paddedNumber}`;
 });
 
-
-projectSchema.index({ organizationId: 1 });
+projectSchema.index({ organizationId: 1  ,projectCode: 1 }, { unique: true })
 
 const ProjectModel = model("ProjectModel", projectSchema);
 

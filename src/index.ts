@@ -9,6 +9,8 @@ import connectDB from './config/connectDB.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import organizationRoutes from './routes/organization_routes/organization.routes.js';
 import userRoutes from './routes/user_router/user.routes.js';
+import materialCategoryRoutes from './routes/material_routes/materialCategory.routes.js';
+import projectRoutes from './routes/project_routes/project.routes.js';
 
 // Load environment variables
 dotenv.config({ path: '.env' });
@@ -58,6 +60,8 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use("/api/v1/auth", userRoutes);
 app.use("/api/v1/organization", organizationRoutes);
+app.use("/api/v1/projects", projectRoutes);
+app.use("/api/v1/material-category", materialCategoryRoutes);
 
 // Health Check (Optional but recommended for EC2 monitoring)
 app.get('/health', (req: Request, res: Response) => {

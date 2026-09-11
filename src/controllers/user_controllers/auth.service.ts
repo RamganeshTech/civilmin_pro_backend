@@ -70,7 +70,7 @@ export const loginUser = async (
     password: string
 ): Promise<{ user: IUser; token: string }> => {
     // Explicitly select password since it's excluded by default
-    const user = await UserModel.findOne({ email }).select("+password");
+    const user = await UserModel.findOne({ email }).select("+password").populate("organizationId", "_id name contactEmail phone isActive");
     if (!user) {
         throw new ApiError(401, "Invalid email or password");
     }

@@ -12,7 +12,7 @@ export const createOrganization = async (
   password: string,
   organizationName: string,
   phone?: string
-): Promise<{ user: IUser; token: string, organizationId: Types.ObjectId }> => {
+): Promise<{ user: IUser; organizationId: Types.ObjectId }> => {
 
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) throw new ApiError(409, "Email already registered");
@@ -57,15 +57,15 @@ export const createOrganization = async (
 
     await session.commitTransaction();
 
-    const token = generateToken({
-      userId: user._id.toString(),
-      userName,
-      email,
-      role: "owner",
-      organizationId: organization._id.toString(),
-    });
+    // const token = generateToken({
+    //   userId: user._id.toString(),
+    //   userName,
+    //   email,
+    //   role: "owner",
+    //   organizationId: organization._id.toString(),
+    // });
 
-    return { user, organizationId: organization._id, token };
+    return { user, organizationId: organization._id };
   } catch (error) {
     await session.abortTransaction();
     throw error;

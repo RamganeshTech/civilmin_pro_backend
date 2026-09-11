@@ -40,6 +40,8 @@ export const multiAuthRole = (...roles: IRole[]) => {
         process.env.JWT_SECRET!
       ) as JwtPayload;
 
+      
+
       req.user = {
         userId: decoded.userId,
         organizationId: decoded.organizationId,

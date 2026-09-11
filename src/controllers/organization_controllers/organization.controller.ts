@@ -15,11 +15,11 @@ export const registerOrganization = async (
       return;
     }
 
-    const { user, token } = await organizationService.createOrganization(
+    const { user } = await organizationService.createOrganization(
       userName, email, password, organizationName, phone
     );
 
-    res.status(201).json({ ok: true, token, data: user });
+    res.status(201).json({ ok: true, data: user });
   } catch (error) {
     next(error);
   }
