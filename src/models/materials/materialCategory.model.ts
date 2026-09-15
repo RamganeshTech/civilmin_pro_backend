@@ -3,6 +3,9 @@ import mongoose, { Schema, Document, Types, model } from "mongoose";
 export interface IMaterialCategory extends Document {
   organizationId: Types.ObjectId;
 
+    refNo: string; // auto-generated, immutable — e.g. MC-001, MC-999, MC-1000
+
+
   categoryName: string; // e.g. "Bricks", "Sand", "Steel", "Cement"
   code?: string; // optional short code for reports/filters, e.g. "BRK", "STL"
   description?: string;
@@ -24,6 +27,7 @@ const materialCategorySchema = new Schema<IMaterialCategory>(
       required: true,
     },
 
+    refNo: { type: String, trim: true },
     categoryName: { type: String, required: true, trim: true },
     code: { type: String, trim: true },
     description: { type: String, trim: true },
@@ -39,9 +43,37 @@ const materialCategorySchema = new Schema<IMaterialCategory>(
 
 // Prevent duplicate category names within the same org (case-insensitive via collation)
 materialCategorySchema.index(
-  { organizationId: 1, name: 1 },
-  { unique: true, collation: { locale: "en", strength: 2 } }
+  { organizationId: 1,  },
 );
+
+materialCategorySchema.pre("save", async function (this: IMaterialCategory) {
+  // Only generate once, on creation — never touch it again on updates
+  if (!this.isNew) {
+    return;
+  }
+
+  const prefix = "MC-";
+
+  // Scoped per organization only, same as MaterialItem's refNo
+  const lastCategory = await MaterialCategoryModel.findOne({
+    organizationId: this.organizationId,
+    refNo: { $regex: `^${prefix}` },
+  })
+    .sort({ createdAt: -1 })
+    .select("refNo")
+    .lean();
+
+  let nextNumber = 1;
+
+  if (lastCategory?.refNo) {
+    const lastNumberStr = lastCategory.refNo.split("-").pop();
+    const lastNumber = parseInt(lastNumberStr || "0", 10);
+    nextNumber = lastNumber + 1;
+  }
+
+  const paddedNumber = String(nextNumber).padStart(3, "0");
+  this.refNo = `${prefix}${paddedNumber}`;
+});
 
 const MaterialCategoryModel = model<IMaterialCategory>("MaterialCategoryModel", materialCategorySchema);
 

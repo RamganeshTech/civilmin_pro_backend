@@ -13,10 +13,18 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 
 // GET /material-categories?organizationId=xxx
 materialCategoryRoutes.get(
-  "/",
+  "/:organizationId",
   readRoles,
   categoryController.getAllCategories
 );
+
+materialCategoryRoutes.get(
+  "/:organizationId/inactive",
+  readRoles,
+  categoryController.getInactiveCategories
+);
+
+
 
 /* ------------------------------------------------------------------ */
 /*  Organization param-scoped routes                                 */
@@ -55,7 +63,21 @@ materialCategoryRoutes.patch(
 materialCategoryRoutes.delete(
   "/:organizationId/:categoryId",
   writeRoles,
-  categoryController.deleteCategory
+  categoryController.softDeleteCategory
 );
+
+materialCategoryRoutes.delete(
+  "/:organizationId/:categoryId/hard-delete",
+  writeRoles,
+  categoryController.deleteCategoryFully
+);
+
+
+materialCategoryRoutes.put(
+  "/:organizationId/:categoryId/recover",
+  writeRoles,
+  categoryController.recoverCategory
+);
+
 
 export default materialCategoryRoutes;

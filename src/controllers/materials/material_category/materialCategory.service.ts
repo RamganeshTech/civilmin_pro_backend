@@ -2,6 +2,8 @@ import { Types } from "mongoose";
 import MaterialCategoryModel, { type IMaterialCategory } from "../../../models/materials/materialCategory.model.js";
 import { ApiError } from "../../../utils/apiError.js";
 import MaterialItemModel from "../../../models/materials/materialItem.model.js";
+import mongoose from "mongoose";
+
 
 export interface ICategoryFilters {
   search?: string; // matches categoryName / code
@@ -56,6 +58,7 @@ const assertCategoryNameIsUnique = async (
 ): Promise<void> => {
   const existing = await MaterialCategoryModel.findOne({
     organizationId,
+    isActive: true,
     categoryName: { $regex: `^${categoryName}$`, $options: "i" },
     ...(excludeCategoryId ? { _id: { $ne: excludeCategoryId } } : {}),
   }).lean();
@@ -75,16 +78,16 @@ export const getAllCategories = async (
   filters: ICategoryFilters
 ): Promise<{
   categories: IMaterialCategory[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  // total: number;
+  // page: number;
+  // limit: number;
+  // totalPages: number;
 }> => {
   const {
     search,
     isActive,
-    page = "1",
-    limit = "10",
+    // page = "1",
+    // limit = "10",
     sortBy = "categoryName",
     sortOrder = "asc",
   } = filters;
@@ -100,27 +103,50 @@ export const getAllCategories = async (
     ];
   }
 
-  const pageNum = Math.max(parseInt(page, 10) || 1, 1);
-  const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
-  const skip = (pageNum - 1) * limitNum;
+  // const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+  // const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
+  // const skip = (pageNum - 1) * limitNum;
   const sortDirection = sortOrder === "asc" ? 1 : -1;
 
-  const [categories, total] = await Promise.all([
-    MaterialCategoryModel.find(query)
-      .sort({ [sortBy]: sortDirection })
-      .skip(skip)
-      .limit(limitNum)
-      .lean(),
-    MaterialCategoryModel.countDocuments(query),
-  ]);
+   const categories = await MaterialCategoryModel.find({ organizationId, isActive: true })
+    // .select("categoryName code icon color _id")
+    .sort({ categoryName: 1 })
+    .lean();
 
-  return {
-    categories: categories as unknown as IMaterialCategory[],
-    total,
-    page: pageNum,
-    limit: limitNum,
-    totalPages: Math.max(Math.ceil(total / limitNum), 1),
-  };
+
+  // const [categories, total] = await Promise.all([
+  //   MaterialCategoryModel.find(query)
+  //     .sort({ [sortBy]: sortDirection })
+  //     .skip(skip)
+  //     .limit(limitNum)
+  //     .lean(),
+  //   MaterialCategoryModel.countDocuments(query),
+  // ]);
+
+  
+
+  // return {
+  //   categories: categories as unknown as IMaterialCategory[],
+  //   total,
+  //   page: pageNum,
+  //   limit: limitNum,
+  //   totalPages: Math.max(Math.ceil(total / limitNum), 1),
+  // };
+
+  return {categories: categories as unknown as IMaterialCategory[]}
+};
+
+
+
+export const getInactiveCategories = async (
+  organizationId: string
+): Promise<{ categories: IMaterialCategory[] }> => {
+  const categories = await MaterialCategoryModel.find({
+    organizationId,
+    isActive: false,
+  }).sort({ updatedAt: -1 });
+
+  return { categories };
 };
 
 /* ------------------------------------------------------------------ */
@@ -215,19 +241,19 @@ export const deleteCategory = async (
     throw new ApiError(400, "Invalid category id");
   }
 
-  // Guard against orphaning material items that still point at this category
-  const activeItemCount = await MaterialItemModel.countDocuments({
-    categoryId,
-    organizationId,
-    isActive: true,
-  });
+  // // Guard against orphaning material items that still point at this category
+  // const activeItemCount = await MaterialItemModel.countDocuments({
+  //   categoryId,
+  //   organizationId,
+  //   isActive: true,
+  // });
 
-  if (activeItemCount > 0) {
-    throw new ApiError(
-      400,
-      `Cannot delete this category - ${activeItemCount} active material item(s) are still assigned to it. Reassign or deactivate those items first.`
-    );
-  }
+  // if (activeItemCount > 0) {
+  //   throw new ApiError(
+  //     400,
+  //     `Cannot delete this category - ${activeItemCount} active material item(s) are still assigned to it. Reassign or deactivate those items first.`
+  //   );
+  // }
 
   const category = await MaterialCategoryModel.findOneAndUpdate(
     { _id: categoryId, organizationId },
@@ -241,6 +267,45 @@ export const deleteCategory = async (
 
   return { category };
 };
+
+
+export const hardDeleteCategory = async (
+  categoryId: string,
+  organizationId: string
+): Promise<{ deletedItemsCount: number }> => {
+  if (!Types.ObjectId.isValid(categoryId)) {
+    throw new ApiError(400, "Invalid category id");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    let deletedItemsCount = 0;
+
+    await session.withTransaction(async () => {
+      const deleteItemsResult = await MaterialItemModel.deleteMany(
+        { categoryId, organizationId },
+        { session }
+      );
+
+      deletedItemsCount = deleteItemsResult.deletedCount || 0;
+
+      const deletedCategory = await MaterialCategoryModel.findOneAndDelete(
+        { _id: categoryId, organizationId },
+        { session }
+      );
+
+      if (!deletedCategory) {
+        throw new ApiError(404, "Category not found");
+      }
+    });
+
+    return { deletedItemsCount };
+  } finally {
+    await session.endSession();
+  }
+};
+
 
 /* ------------------------------------------------------------------ */
 /*  Dropdown (lightweight list for <select> options)                   */
@@ -258,9 +323,32 @@ export const getCategoriesDropdown = async (
   organizationId: string
 ): Promise<{ categories: ICategoryDropdownItem[] }> => {
   const categories = await MaterialCategoryModel.find({ organizationId, isActive: true })
-    .select("categoryName code icon color")
+    .select("categoryName code icon color _id")
     .sort({ categoryName: 1 })
     .lean();
 
   return { categories: categories as unknown as ICategoryDropdownItem[] };
+};
+
+
+
+export const recoverCategory = async (
+  categoryId: string,
+  organizationId: string
+): Promise<{ category: IMaterialCategory }> => {
+  if (!Types.ObjectId.isValid(categoryId)) {
+    throw new ApiError(400, "Invalid category id");
+  }
+
+  const category = await MaterialCategoryModel.findOneAndUpdate(
+    { _id: categoryId, organizationId, isActive: false },
+    { $set: { isActive: true } },
+    { new: true }
+  );
+
+  if (!category) {
+    throw new ApiError(404, "Inactive category not found");
+  }
+
+  return { category };
 };

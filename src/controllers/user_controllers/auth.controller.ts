@@ -107,6 +107,30 @@ export const getMe = async (
 
 
 
+export const userAuthenticated = async (
+    req: RoleBasedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { userId } = req.user!
+
+
+        if (!userId) {
+            res.status(400).json({ ok: false, message: "userId not found, please login" });
+            return;
+        }
+
+        const user = await authService.getByUserId(userId);
+
+        res.status(200).json({ ok: true, data: user });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
 export const logout = (
     req: Request,
     res: Response,

@@ -35,6 +35,9 @@ export interface IMaterialItem extends Document {
     //     reference?: string; // quotation no. / invoice no. / document reference
     //   };
 
+        refNo: string; // auto-generated, immutable — e.g. MI-001, MI-999, MI-1000
+
+
     source: string
 
     notes?: string;
@@ -71,6 +74,8 @@ const materialItemSchema = new Schema<IMaterialItem>(
             enum: ["Bag", "Kg", "Ton", "Cft", "Cum", "Sqft", "Sqm", "Rft", "Nos", "Litre", "Load", "Bundle", "Roll", "Box"],
             required: true,
         },
+
+        refNo: { type: String, trim: true },
 
         currentRate: { type: Number, required: true, min: 0 },
         previousRate: { type: Number, min: 0 },
@@ -130,6 +135,36 @@ materialItemSchema.statics.computeRateChange = function (
 
     return { rateChangePercentage: rounded, rateChangeDirection: direction };
 };
+
+
+materialItemSchema.pre("save", async function (this: IMaterialItem) {
+  // Only generate once, on creation — never touch it again on updates
+  if (!this.isNew) {
+    return;
+  }
+
+  const prefix = "MI-";
+
+  // Scoped per organization only (no year component here, unlike project codes)
+  const lastItem = await MaterialItemModel.findOne({
+    organizationId: this.organizationId,
+    refNo: { $regex: `^${prefix}` },
+  })
+    .sort({ createdAt: -1 })
+    .select("refNo")
+    .lean();
+
+  let nextNumber = 1;
+
+  if (lastItem?.refNo) {
+    const lastNumberStr = lastItem.refNo.split("-").pop();
+    const lastNumber = parseInt(lastNumberStr || "0", 10);
+    nextNumber = lastNumber + 1;
+  }
+
+  const paddedNumber = String(nextNumber).padStart(3, "0");
+  this.refNo = `${prefix}${paddedNumber}`;
+});
 
 export interface IMaterialItemModel extends mongoose.Model<IMaterialItem> {
     computeRateChange(

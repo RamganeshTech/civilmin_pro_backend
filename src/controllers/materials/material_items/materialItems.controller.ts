@@ -26,6 +26,28 @@ export const getAllItems = async (
   }
 };
 
+
+export const getInactiveItems = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    const result = await itemService.getInactiveItems(organizationId);
+
+    res.status(200).json({ ok: true, data: result.items });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /* ------------------------------------------------------------------ */
 /*  GET /organizations/:organizationId/material-items/:itemId          */
 /* ------------------------------------------------------------------ */
@@ -138,6 +160,61 @@ export const deleteItem = async (
     const result = await itemService.deleteItem(itemId, organizationId);
 
     res.status(200).json({ ok: true, data: result, message: "Material item deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+export const hardDeleteItem = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId, itemId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    if (!itemId) {
+      res.status(400).json({ ok: false, message: "itemId is required" });
+      return;
+    }
+
+    const result = await itemService.hardDeleteItem(itemId, organizationId);
+
+    res.status(200).json({ ok: true, data: result, message: "Material item permanently deleted" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const recoverItem = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId, itemId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    if (!itemId) {
+      res.status(400).json({ ok: false, message: "itemId is required" });
+      return;
+    }
+
+    const result = await itemService.recoverItem(itemId, organizationId);
+
+    res.status(200).json({ ok: true, data: result, message: "Material item recovered successfully" });
   } catch (error) {
     next(error);
   }

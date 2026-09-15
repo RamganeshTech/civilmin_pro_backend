@@ -14,7 +14,7 @@ export const getAllCategories = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { organizationId } = req.query;
+        const { organizationId } = req.params;
 
         if (!organizationId) {
             res.status(400).json({ ok: false, message: "organizationId is required" });
@@ -34,6 +34,28 @@ export const getAllCategories = async (
 /*  NOTE: register this route BEFORE /:categoryId in the router,       */
 /*  otherwise Express will treat "dropdown" as a categoryId param.     */
 /* ------------------------------------------------------------------ */
+
+export const getInactiveCategories = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId } = req.params!;
+
+     if (!organizationId) {
+            res.status(400).json({ ok: false, message: "organizationId is required" });
+            return;
+        }
+
+
+    const result = await categoryService.getInactiveCategories(organizationId);
+
+    res.status(200).json({ ok: true, data: result.categories });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getCategoriesDropdown = async (
     req: RoleBasedRequest,
@@ -147,7 +169,7 @@ export const updateCategory = async (
 /*  DELETE /material-categories/:categoryId                            */
 /* ------------------------------------------------------------------ */
 
-export const deleteCategory = async (
+export const softDeleteCategory = async (
     req: RoleBasedRequest,
     res: Response,
     next: NextFunction
@@ -171,4 +193,62 @@ export const deleteCategory = async (
     } catch (error) {
         next(error);
     }
+};
+
+
+
+export const deleteCategoryFully = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { categoryId , organizationId} = req.params;
+
+    if (!categoryId) {
+      res.status(400).json({ ok: false, message: "categoryId is required" });
+      return;
+    }
+
+     if (!organizationId) {
+            res.status(400).json({ ok: false, message: "organizationId is required" });
+            return;
+        }
+
+    const result = await categoryService.hardDeleteCategory(categoryId, organizationId);
+
+    res.status(200).json({
+      ok: true,
+      message: `Category and ${result.deletedItemsCount} associated item(s) deleted permanently`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const recoverCategory = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId, categoryId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    if (!categoryId) {
+      res.status(400).json({ ok: false, message: "categoryId is required" });
+      return;
+    }
+
+    const result = await categoryService.recoverCategory(categoryId, organizationId);
+
+    res.status(200).json({ ok: true, data: result, message: "Category recovered successfully" });
+  } catch (error) {
+    next(error);
+  }
 };

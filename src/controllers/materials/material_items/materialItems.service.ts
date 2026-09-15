@@ -86,14 +86,16 @@ const assertCategoryIsValid = async (organizationId: string, categoryId: string)
 export const getAllItems = async (
   organizationId: string,
   filters: IItemFilters
-): Promise<{ items: IMaterialItem[]; total: number; page: number; limit: number; totalPages: number }> => {
+): Promise<{ items: IMaterialItem[]; 
+  // total: number; page: number; limit: number; totalPages: number
+ }> => {
   const {
     categoryId,
     status,
     search,
     isActive,
-    page = "1",
-    limit = "10",
+    // page = "1",
+    // limit = "10",
     sortBy = "createdAt",
     sortOrder = "desc",
   } = filters;
@@ -118,28 +120,34 @@ export const getAllItems = async (
     ];
   }
 
-  const pageNum = Math.max(parseInt(page, 10) || 1, 1);
-  const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
-  const skip = (pageNum - 1) * limitNum;
+  // const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+  // const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
+  // const skip = (pageNum - 1) * limitNum;
   const sortDirection = sortOrder === "asc" ? 1 : -1;
+  const items = await MaterialItemModel.find({
+    organizationId,
+    isActive: true,
+  }).sort({ updatedAt: -1 });
 
-  const [items, total] = await Promise.all([
-    MaterialItemModel.find(query)
-      .sort({ [sortBy]: sortDirection })
-      .skip(skip)
-      .limit(limitNum)
-      .populate("categoryId", "categoryName code icon color")
-      .lean(),
-    MaterialItemModel.countDocuments(query),
-  ]);
+  // const [items, total] = await Promise.all([
+  //   MaterialItemModel.find(query)
+  //     .sort({ [sortBy]: sortDirection })
+  //     .skip(skip)
+  //     .limit(limitNum)
+  //     .populate("categoryId", "categoryName code icon color")
+  //     .lean(),
+  //   MaterialItemModel.countDocuments(query),
+  // ]);
 
-  return {
-    items: items as unknown as IMaterialItem[],
-    total,
-    page: pageNum,
-    limit: limitNum,
-    totalPages: Math.max(Math.ceil(total / limitNum), 1),
-  };
+  // return {
+  //   items: items as unknown as IMaterialItem[],
+  //   total,
+  //   page: pageNum,
+  //   limit: limitNum,
+  //   totalPages: Math.max(Math.ceil(total / limitNum), 1),
+  // };
+
+  return {items: items}
 };
 
 /* ------------------------------------------------------------------ */
@@ -272,6 +280,62 @@ export const deleteItem = async (
 
   if (!item) {
     throw new ApiError(404, "Material item not found");
+  }
+
+  return { item };
+};
+
+
+export const hardDeleteItem = async (
+  itemId: string,
+  organizationId: string
+): Promise<{ item: IMaterialItem }> => {
+  if (!Types.ObjectId.isValid(itemId)) {
+    throw new ApiError(400, "Invalid item id");
+  }
+
+  const item = await MaterialItemModel.findOneAndDelete({
+    _id: itemId,
+    organizationId,
+  });
+
+  if (!item) {
+    throw new ApiError(404, "Material item not found");
+  }
+
+  return { item };
+};
+
+export const getInactiveItems = async (
+  organizationId: string
+): Promise<{ items: IMaterialItem[] }> => {
+  const items = await MaterialItemModel.find({
+    organizationId,
+    isActive: false,
+  }).sort({ updatedAt: -1 });
+
+  return { items };
+};
+
+
+
+
+export const recoverItem = async (
+  itemId: string,
+  organizationId: string
+): Promise<{ item: IMaterialItem }> => {
+  if (!Types.ObjectId.isValid(itemId)) {
+    throw new ApiError(400, "Invalid item id");
+  }
+
+  const item = await MaterialItemModel.findOneAndUpdate(
+    { _id: itemId, organizationId, isActive: false },
+    { $set: { isActive: true } },
+    { new: true }
+  );
+
+  if (!item) {
+    throw new ApiError(404, "Inactive material item not found");
   }
 
   return { item };
