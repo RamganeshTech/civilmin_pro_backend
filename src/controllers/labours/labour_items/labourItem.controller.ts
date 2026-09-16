@@ -1,9 +1,28 @@
 import { type Response, type NextFunction } from "express";
+import * as itemService from "./labourItem.service.js";
 import type { RoleBasedRequest } from "../../../utils/utils.js";
-import * as itemService from "./materialItems.service.js"
-/* ------------------------------------------------------------------ */
-/*  GET /organizations/:organizationId/material-items                 */
-/* ------------------------------------------------------------------ */
+
+export const createItem = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { userId } = req.user!;
+    const { organizationId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    const result = await itemService.createItem(organizationId, userId, req.body);
+
+    res.status(201).json({ ok: true, data: result, message: "Labour item created successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAllItems = async (
   req: RoleBasedRequest,
@@ -18,7 +37,17 @@ export const getAllItems = async (
       return;
     }
 
-    const result = await itemService.getAllItems(organizationId, req.query as any);
+    const { categoryId, status, skillLevel, search, isActive, page, limit } = req.query;
+
+    const result = await itemService.getAllItems(organizationId, {
+      categoryId,
+      status: status as any,
+      skillLevel: skillLevel as any,
+      search,
+      isActive: isActive === undefined ? undefined : isActive === "true",
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
 
     res.status(200).json({ ok: true, data: result });
   } catch (error) {
@@ -26,6 +55,31 @@ export const getAllItems = async (
   }
 };
 
+export const getSingleItem = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId, itemId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    if (!itemId) {
+      res.status(400).json({ ok: false, message: "itemId is required" });
+      return;
+    }
+
+    const result = await itemService.getSingleItem(itemId, organizationId);
+
+    res.status(200).json({ ok: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getInactiveItems = async (
   req: RoleBasedRequest,
@@ -48,66 +102,6 @@ export const getInactiveItems = async (
   }
 };
 
-/* ------------------------------------------------------------------ */
-/*  GET /organizations/:organizationId/material-items/:itemId          */
-/* ------------------------------------------------------------------ */
-
-export const getItemById = async (
-  req: RoleBasedRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { organizationId, itemId } = req.params;
-
-    if (!organizationId) {
-      res.status(400).json({ ok: false, message: "organizationId is required" });
-      return;
-    }
-
-    if (!itemId) {
-      res.status(400).json({ ok: false, message: "itemId is required" });
-      return;
-    }
-
-    const result = await itemService.getItemById(itemId, organizationId);
-
-    res.status(200).json({ ok: true, data: result });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/* ------------------------------------------------------------------ */
-/*  POST /organizations/:organizationId/material-items                 */
-/* ------------------------------------------------------------------ */
-
-export const createItem = async (
-  req: RoleBasedRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { userId } = req.user!;
-    const { organizationId } = req.params;
-
-    if (!organizationId) {
-      res.status(400).json({ ok: false, message: "organizationId is required" });
-      return;
-    }
-
-    const result = await itemService.createItem(organizationId, userId, req.body);
-
-    res.status(201).json({ ok: true, data: result, message: "Material item created successfully" });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/* ------------------------------------------------------------------ */
-/*  PATCH /organizations/:organizationId/material-items/:itemId        */
-/* ------------------------------------------------------------------ */
-
 export const updateItem = async (
   req: RoleBasedRequest,
   res: Response,
@@ -129,15 +123,11 @@ export const updateItem = async (
 
     const result = await itemService.updateItem(itemId, organizationId, userId, req.body);
 
-    res.status(200).json({ ok: true, data: result, message: "Material item updated successfully" });
+    res.status(200).json({ ok: true, data: result, message: "Labour item updated successfully" });
   } catch (error) {
     next(error);
   }
 };
-
-/* ------------------------------------------------------------------ */
-/*  DELETE /organizations/:organizationId/material-items/:itemId       */
-/* ------------------------------------------------------------------ */
 
 export const deleteItem = async (
   req: RoleBasedRequest,
@@ -159,13 +149,11 @@ export const deleteItem = async (
 
     const result = await itemService.deleteItem(itemId, organizationId);
 
-    res.status(200).json({ ok: true, data: result, message: "Material item deleted successfully" });
+    res.status(200).json({ ok: true, data: result, message: "Labour item deleted successfully" });
   } catch (error) {
     next(error);
   }
 };
-
-
 
 export const hardDeleteItem = async (
   req: RoleBasedRequest,
@@ -187,12 +175,11 @@ export const hardDeleteItem = async (
 
     const result = await itemService.hardDeleteItem(itemId, organizationId);
 
-    res.status(200).json({ ok: true, data: result, message: "Material item permanently deleted" });
+    res.status(200).json({ ok: true, data: result, message: "Labour item permanently deleted" });
   } catch (error) {
     next(error);
   }
 };
-
 
 export const recoverItem = async (
   req: RoleBasedRequest,
@@ -214,12 +201,11 @@ export const recoverItem = async (
 
     const result = await itemService.recoverItem(itemId, organizationId);
 
-    res.status(200).json({ ok: true, data: result, message: "Material item recovered successfully" });
+    res.status(200).json({ ok: true, data: result, message: "Labour item recovered successfully" });
   } catch (error) {
     next(error);
   }
 };
-
 
 export const recoverItems = async (
   req: RoleBasedRequest,
@@ -252,4 +238,3 @@ export const recoverItems = async (
     next(error);
   }
 };
-

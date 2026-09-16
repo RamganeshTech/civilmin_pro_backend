@@ -36,6 +36,16 @@ materialItemRoutes.post(
   itemController.createItem
 );
 
+
+
+materialItemRoutes.patch(
+  "/:organizationId/recover",
+  writeRoles,
+  itemController.recoverItems
+);
+
+
+
 // GET /organizations/:organizationId/material-items/:itemId
 materialItemRoutes.get(
   "/:organizationId/:itemId",
@@ -72,9 +82,6 @@ materialItemRoutes.put(
   writeRoles,
   itemController.recoverItem
 );
-
-
-
 
 
 export default materialItemRoutes;

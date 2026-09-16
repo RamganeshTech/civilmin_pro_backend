@@ -30,3 +30,20 @@ export interface RoleBasedRequest extends Request {
     userName: string;
   };
 }
+
+
+
+export const pickFields = <T extends Record<string, any>>(
+  source: Record<string, any>,
+  allowedFields: (keyof T)[]
+): Partial<T> => {
+  const result: Partial<T> = {};
+
+  for (const field of allowedFields) {
+    if (source[field as string] !== undefined) {
+      result[field] = source[field as string];
+    }
+  }
+
+  return result;
+};

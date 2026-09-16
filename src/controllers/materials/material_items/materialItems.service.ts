@@ -340,3 +340,71 @@ export const recoverItem = async (
 
   return { item };
 };
+
+
+export interface RecoverItemsFilters {
+  itemIds?: string[];
+  refNos?: string[];
+  fromDate?: string; // ISO date string
+  toDate?: string;   // ISO date string
+}
+
+export const recoverItems = async (
+  organizationId: string,
+  filters: RecoverItemsFilters
+): Promise<{ recoveredCount: number; items: IMaterialItem[] }> => {
+  const { itemIds, refNos, fromDate, toDate } = filters;
+
+  if (
+    (!itemIds || itemIds.length === 0) &&
+    (!refNos || refNos.length === 0) &&
+    !fromDate &&
+    !toDate
+  ) {
+    throw new ApiError(
+      400,
+      "Provide at least one of: itemIds, refNos, or a date range (fromDate/toDate)"
+    );
+  }
+
+  const query: Record<string, any> = { organizationId, isActive: false };
+  const orConditions: Record<string, any>[] = [];
+
+  if (itemIds && itemIds.length > 0) {
+    const validIds = itemIds.filter((id) => Types.ObjectId.isValid(id));
+    if (validIds.length > 0) {
+      orConditions.push({ _id: { $in: validIds } });
+    }
+  }
+
+  if (refNos && refNos.length > 0) {
+    orConditions.push({ refNo: { $in: refNos } });
+  }
+
+  if (orConditions.length > 0) {
+    query.$or = orConditions;
+  }
+
+  if (fromDate || toDate) {
+    query.updatedAt = {};
+    if (fromDate) query.updatedAt.$gte = new Date(fromDate);
+    if (toDate) query.updatedAt.$lte = new Date(toDate);
+  }
+
+  const itemsToRecover = await MaterialItemModel.find(query).select("_id");
+
+  if (itemsToRecover.length === 0) {
+    throw new ApiError(404, "No matching inactive items found to recover");
+  }
+
+  const idsToRecover = itemsToRecover.map((item) => item._id);
+
+  await MaterialItemModel.updateMany(
+    { _id: { $in: idsToRecover } },
+    { $set: { isActive: true } }
+  );
+
+  const items = await MaterialItemModel.find({ _id: { $in: idsToRecover } });
+
+  return { recoveredCount: items.length, items };
+};
