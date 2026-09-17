@@ -81,6 +81,28 @@ export const getSingleItem = async (
   }
 };
 
+export const getLabourItemsDropdown = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    const result = await itemService.getLabourItemsDropdown(organizationId);
+
+    res.status(200).json({ ok: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getInactiveItems = async (
   req: RoleBasedRequest,
   res: Response,

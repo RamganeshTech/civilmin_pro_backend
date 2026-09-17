@@ -1,58 +1,89 @@
 // models/boq.model.ts
 import { Schema, model, Types, Document } from "mongoose";
-import type { IMaterialUnit } from "../materials/materialItem.model.js";
+import { MATERIAL_UNITS, type IMaterialUnit } from "../materials/materialItem.model.js";
 // import { IMaterialUnit } from "./materialItem.model"; // adjust path to your existing enum location
 
 // ── LINE ITEM ──────────────────────────────────────────────────────────────
 export interface IBOQLineItem {
-  no: string;
+  // no: string;
   description: string;
   unit: IMaterialUnit;
   quantity: number;
   rate: number;
   amount: number; // quantity * rate, computed at generation time — never recomputed on read
-  isCode?: string;
+  govtCode?: string;
   materialItemId?: Types.ObjectId; // ref to MaterialItem the rate was sourced from, if any
 }
 
 const BOQLineItemSchema = new Schema<IBOQLineItem>(
   {
-    no: { type: String, required: true },
-    description: { type: String, required: true },
-    unit: { type: String, enum: Object.values(IMaterialUnit), required: true },
-    quantity: { type: Number, required: true },
-    rate: { type: Number, required: true },
-    amount: { type: Number, required: true },
-    isCode: { type: String },
-    materialItemId: { type: Schema.Types.ObjectId, ref: "MaterialItem" },
+    // no: { type: String, required: true },
+    description: { type: String, default: null },
+    unit: { type: String, enum: Object.values(MATERIAL_UNITS), default: null },
+    quantity: { type: Number, default: null },
+    rate: { type: Number, default: null },  // price per unit
+    amount: { type: Number, default: null },  // quantity × rate
+    govtCode: { type: String, default: null },  // S 2212:1991 Cl.5
+    materialItemId: { type: Schema.Types.ObjectId, ref: "MaterialItemModel", default: null },
   },
-  { _id: false }
+  { _id: true }
+);
+
+// ── LABOUR ITEM ───────────────────────────────────────────────────────────
+export interface IBOQLabourItem {
+  labourType: string;      // "Mason", "Helper", "Tile Layer", "Electrician" — what kind of worker
+  description: string;     // "Brickwork labour", "Plastering labour" — what task they're doing
+  unit: IMaterialUnit;     // "cum", "sqft", "point", "MT" — how this labour is measured/priced
+  quantity: number;
+  rate: number;            // rate per unit for this labour type
+  amount: number;          // quantity * rate
+  govtCode?: string;
+  labourItemId?: Types.ObjectId; // ref to LabourItem the rate was sourced from
+
+}
+
+const BOQLabourItemSchema = new Schema<IBOQLabourItem>(
+  {
+    labourType: { type: String, default: null },
+    description: { type: String, default: null },
+    unit: { type: String, enum: MATERIAL_UNITS, default: null },
+    quantity: { type: Number, default: null },
+    rate: { type: Number, default: null },
+    amount: { type: Number, default: null },
+    govtCode: { type: String, default: null },
+    labourItemId: { type: Schema.Types.ObjectId, ref: "LabourItemModel", default: null },
+
+  },
+  { _id: true }
 );
 
 // ── SECTION (one per selected category) ─────────────────────────────────────
 export interface IBOQSection {
-  categoryId: string; // matches boq-categories.config.ts key, e.g. 'brickwork' — not a DB ref
-  categoryName: string;
-  categoryCode: string;
-  isCodeRef?: string;
+  sectionId: string; // matches boq-categories.config.ts key, e.g. 'brickwork' — not a DB ref
+  sectionName: string;
+  sectionCode: string;
+  govtCode?: string;
   inputs: Record<string, string | number>; // snapshot of dimension form values used
   lineItems: IBOQLineItem[];
+  labours: IBOQLabourItem[];   // NEW
+
   subtotal: number;
   warnings: string[];
 }
 
 const BOQSectionSchema = new Schema<IBOQSection>(
   {
-    categoryId: { type: String, required: true },
-    categoryName: { type: String, required: true },
-    categoryCode: { type: String, required: true },
-    isCodeRef: { type: String },
-    inputs: { type: Schema.Types.Mixed, required: true, default: {} },
-    lineItems: { type: [BOQLineItemSchema], required: true, default: [] },
-    subtotal: { type: Number, required: true, default: 0 },
-    warnings: { type: [String], required: true, default: [] },
+    sectionId: { type: String, default: null }, // 'brickwork' it is a key for the finding the right formula
+    sectionName: { type: String, default: null },  // 'Brickwork'
+    sectionCode: { type: String, default: null },  // 'F01'
+    govtCode: { type: String, default: null },
+    inputs: { type: Schema.Types.Mixed, default: {} },  // {length: 40, height: 10, thickness: 0.75,}
+    lineItems: { type: [BOQLineItemSchema], default: [] },
+    labours: { type: [BOQLabourItemSchema], default: [] },
+    subtotal: { type: Number, default: 0 },
+    warnings: { type: [String], default: [] },
   },
-  { _id: false }
+  { _id: true }
 );
 
 // ── BOQ STATUS ───────────────────────────────────────────────────────────────
@@ -66,7 +97,7 @@ export enum IBOQStatus {
 export interface IBOQ extends Document {
   organizationId: Types.ObjectId;
   projectId: Types.ObjectId;
-  boqCode: string;
+  boqNo: string;
   version: number;
   status: IBOQStatus;
   sections: IBOQSection[];
@@ -97,33 +128,59 @@ const BOQSchema = new Schema<IBOQ>(
       ref: "ProjectModel",
       required: true,
     },
-    boqCode: { type: String, required: true, trim: true },
-    version: { type: Number, required: true, default: 1 },
+    boqNo: { type: String, trim: true, default: null },
+    version: { type: Number, default: 1 },
     status: {
       type: String,
       enum: Object.values(IBOQStatus),
       required: true,
       default: IBOQStatus.DRAFT,
     },
-    sections: { type: [BOQSectionSchema], required: true, default: [] },
-    totalCost: { type: Number, required: true, default: 0 },
-    materialsTotal: { type: Number, required: true, default: 0 },
-    labourTotal: { type: Number, required: true, default: 0 },
+    sections: { type: [BOQSectionSchema], default: [] },
+    totalCost: { type: Number, default: 0 },
+    materialsTotal: { type: Number, default: 0 },
+    labourTotal: { type: Number, default: 0 },
     perSqftRate: { type: Number, default: null },
-    warnings: { type: [String], required: true, default: [] },
+    warnings: { type: [String], default: [] },
     approvedBy: { type: String, default: null },
     approvalNotes: { type: String, default: null },
     approvedAt: { type: Date, default: null },
-    createdBy: { type: Schema.Types.ObjectId, ref: "UserModel", required: true },
-    updatedBy: { type: Schema.Types.ObjectId, ref: "UserModel", required: true },
-    isActive: { type: Boolean, required: true, default: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "UserModel", default: null },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "UserModel", default: null },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
+// ── PRE-SAVE: AUTO-GENERATE boqNo ───────────────────────────────────────────
+BOQSchema.pre("save", async function (this: IBOQ) {
+  if (!this.isNew) return; // only generate once, on creation — never touch it again on updates
+
+  const prefix = "BOQ-";
+
+  const lastBOQ = await BOQModel.findOne({
+    organizationId: this.organizationId,
+    boqNo: { $regex: `^${prefix}` },
+  })
+    .sort({ createdAt: -1 })
+    .select("boqNo")
+    .lean();
+
+  let nextNumber = 1;
+
+  if (lastBOQ?.boqNo) {
+    const lastNumberStr = lastBOQ.boqNo.split("-").pop();
+    const lastNumber = parseInt(lastNumberStr || "0", 10);
+    nextNumber = lastNumber + 1;
+  }
+
+  const paddedNumber = String(nextNumber).padStart(3, "0");
+  this.boqNo = `${prefix}${paddedNumber}`;
+});
+
 // ── INDEXES ────────────────────────────────────────────────────────────────
 // Fast lookup of a project's BOQ history, newest version first
-BOQSchema.index({ organizationId: 1, projectId: 1,});
+BOQSchema.index({ organizationId: 1, projectId: 1, });
 
 // One version number per project — prevents two drafts racing to the same version
 // BOQSchema.index({ projectId: 1, version: 1 }, { unique: true });

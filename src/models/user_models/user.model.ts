@@ -12,12 +12,21 @@ export interface IUpload {
 
 export type IRole = "admin" | "owner" | "staff" | "cto";
 
+
+export interface IActionPermission {
+  create: boolean;
+  get: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
 export interface IUser extends Document {
   organizationId: Types.ObjectId;
   email?: string;
   userName: string;
   password: string;
   role: IRole
+  permission: Record<string, IActionPermission>; // Allows dynamic modules in the future
   phoneNo?: string;
   profileImage: IUpload | null
   isActive: boolean
@@ -35,6 +44,17 @@ const uploadSchema = new Schema<IUpload>({
   uploadedAt: { type: Date, default: new Date() }
 });
 
+
+const actionPermissionSchema = new Schema<IActionPermission>(
+  {
+    create: { type: Boolean, default: false },
+    get: { type: Boolean, default: false },
+    update: { type: Boolean, default: false },
+    delete: { type: Boolean, default: false },
+  },
+  { _id: true }
+);
+
 const userSchema = new Schema<IUser>(
   {
     organizationId: {
@@ -46,6 +66,12 @@ const userSchema = new Schema<IUser>(
     email: { type: String, default: "" },
     userName: { type: String, required: true },
     password: { type: String, required: true },
+
+    permission: {
+      type: Map,
+      of: actionPermissionSchema,
+      default: {},
+    },
 
     role: {
       type: String,

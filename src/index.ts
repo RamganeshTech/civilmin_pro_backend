@@ -14,6 +14,7 @@ import projectRoutes from './routes/project_routes/project.routes.js';
 import materialItemRoutes from './routes/material_routes/materialItems.routes.js';
 import labourCategoryRoutes from './routes/labour_routes/labourCategory.routes.js';
 import labourItemRoutes from './routes/labour_routes/labourItem.routes.js';
+import boqRoutes from './routes/boq/boq.routes.js';
 
 // Load environment variables
 dotenv.config({ path: '.env' });
@@ -68,6 +69,7 @@ app.use("/api/v1/material-category", materialCategoryRoutes);
 app.use("/api/v1/material-items", materialItemRoutes);
 app.use("/api/v1/labour-category", labourCategoryRoutes);
 app.use("/api/v1/labour-items", labourItemRoutes);
+app.use("/api/v1/boq", boqRoutes);
 
 // Health Check (Optional but recommended for EC2 monitoring)
 app.get('/health', (req: Request, res: Response) => {

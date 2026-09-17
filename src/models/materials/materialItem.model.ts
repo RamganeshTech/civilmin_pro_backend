@@ -10,6 +10,9 @@ export type IMaterialItemStatus = "Active" | "Inactive" | "Discontinued";
 export type IRateChangeDirection = "increase" | "decrease" | "no_change";
 
 // export type IRateSourceType = "Vendor" | "Market Survey" | "Government Rate" | "Manual Entry" | "Other";
+export const MATERIAL_UNITS: IMaterialUnit[] = [
+    "Bag" , "Kg" , "Ton" , "Cft" , "Cum" , "Sqft" , "Sqm",
+    "Rft" , "Nos" , "Litre" , "Load" , "Bundle" , "Roll", "Box"]; 
 
 export interface IMaterialItem extends Document {
     organizationId: Types.ObjectId;
@@ -71,7 +74,8 @@ const materialItemSchema = new Schema<IMaterialItem>(
         brand: { type: String, trim: true },
         unit: {
             type: String,
-            enum: ["Bag", "Kg", "Ton", "Cft", "Cum", "Sqft", "Sqm", "Rft", "Nos", "Litre", "Load", "Bundle", "Roll", "Box"],
+            // enum: ["Bag", "Kg", "Ton", "Cft", "Cum", "Sqft", "Sqm", "Rft", "Nos", "Litre", "Load", "Bundle", "Roll", "Box"],
+            enum: MATERIAL_UNITS,
             required: true,
         },
 

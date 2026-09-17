@@ -45,6 +45,12 @@ materialItemRoutes.patch(
 );
 
 
+materialItemRoutes.get(
+  "/:organizationId/dropdown",
+  readRoles,
+  itemController.getMaterialItemsDropdown
+);
+
 
 // GET /organizations/:organizationId/material-items/:itemId
 materialItemRoutes.get(

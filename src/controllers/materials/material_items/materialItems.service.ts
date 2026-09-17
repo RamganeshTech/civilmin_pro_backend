@@ -174,6 +174,19 @@ export const getItemById = async (
   return { item };
 };
 
+
+export const getMaterialItemsDropdown = async (
+  organizationId: string
+): Promise<{ items: any[] }> => {
+  const items = await MaterialItemModel.find({ organizationId, isActive: true })
+    // Selecting fields that give context to the user in a dropdown (name, brand, unit, rate)
+    .select("productName brand unit currentRate refNo _id")
+    .sort({ productName: 1 })
+    .lean();
+
+  return { items };
+};
+
 /* ------------------------------------------------------------------ */
 /*  Create                                                             */
 /* ------------------------------------------------------------------ */
