@@ -321,13 +321,13 @@ export interface ICategoryDropdownItem {
 
 export const getCategoriesDropdown = async (
   organizationId: string
-): Promise<{ categories: ICategoryDropdownItem[] }> => {
+): Promise<ICategoryDropdownItem[]> => {
   const categories = await MaterialCategoryModel.find({ organizationId, isActive: true })
     .select("categoryName code icon color _id")
     .sort({ categoryName: 1 })
     .lean();
 
-  return { categories: categories as unknown as ICategoryDropdownItem[] };
+  return  categories as unknown as ICategoryDropdownItem[] ;
 };
 
 

@@ -6,18 +6,21 @@ import { MATERIAL_UNITS, type IMaterialUnit } from "../materials/materialItem.mo
 // ── LINE ITEM ──────────────────────────────────────────────────────────────
 export interface IBOQLineItem {
   // no: string;
+    // slotKey: string; // internal: e.g. 'brick_solid' — matches formula output to this exact row
+
   description: string;
   unit: IMaterialUnit;
   quantity: number;
   rate: number;
   amount: number; // quantity * rate, computed at generation time — never recomputed on read
   govtCode?: string;
-  materialItemId?: Types.ObjectId; // ref to MaterialItem the rate was sourced from, if any
+  materialItemId?: Types.ObjectId | null; // ref to MaterialItem the rate was sourced from, if any
 }
 
 const BOQLineItemSchema = new Schema<IBOQLineItem>(
   {
     // no: { type: String, required: true },
+    // slotKey: { type: String, default: null },
     description: { type: String, default: null },
     unit: { type: String, enum: Object.values(MATERIAL_UNITS), default: null },
     quantity: { type: Number, default: null },
@@ -38,7 +41,7 @@ export interface IBOQLabourItem {
   rate: number;            // rate per unit for this labour type
   amount: number;          // quantity * rate
   govtCode?: string;
-  labourItemId?: Types.ObjectId; // ref to LabourItem the rate was sourced from
+  labourItemId?: Types.ObjectId | null; // ref to LabourItem the rate was sourced from
 
 }
 

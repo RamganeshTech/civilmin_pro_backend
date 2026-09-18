@@ -85,14 +85,19 @@ export const getMaterialItemsDropdown = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { organizationId } = req.params;
+    const { organizationId, categoryId } = req.params;
 
     if (!organizationId) {
       res.status(400).json({ ok: false, message: "organizationId is required" });
       return;
     }
 
-    const result = await itemService.getMaterialItemsDropdown(organizationId);
+     if (!categoryId) {
+      res.status(400).json({ ok: false, message: "categoryId is required" });
+      return;
+    }
+
+    const result = await itemService.getMaterialItemsDropdown(organizationId, categoryId);
 
     res.status(200).json({ ok: true, data: result });
   } catch (error) {

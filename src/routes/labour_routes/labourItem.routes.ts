@@ -32,9 +32,9 @@ labourItemRoutes.get(
   itemController.getInactiveItems
 );
 
-// NOTE: Register BEFORE /:organizationId/:itemId
+
 labourItemRoutes.get(
-  "/:organizationId/dropdown",
+  "/:organizationId/:categoryId/dropdown",
   readRoles,
   itemController.getLabourItemsDropdown
 );

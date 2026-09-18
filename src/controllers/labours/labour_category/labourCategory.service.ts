@@ -79,7 +79,7 @@ export const getAllCategories = async (
 
 export const getCategoriesForDropdown = async (
   organizationId: string
-): Promise<{ categories: { _id: Types.ObjectId; categoryName: string }[] }> => {
+): Promise<{  _id: Types.ObjectId; categoryName: string  }[]> => {
   const categories = await LabourCategoryModel.find({
     organizationId,
     isActive: true,
@@ -88,7 +88,7 @@ export const getCategoriesForDropdown = async (
     .sort({ categoryName: 1 })
     .lean();
 
-  return { categories };
+  return categories;
 };
 
 export const getCategoryById = async (

@@ -46,10 +46,17 @@ boqRoutes.patch(
 );
 
 // PATCH /boq/:organizationId/:boqId/sections/:sectionId/inputs  → step 2
+// boqRoutes.patch(
+//   "/:organizationId/:boqId/sections/:sectionId/inputs",
+//   writeRoles,
+//   boqController.saveSectionInputs
+// );
+
+// PATCH /boq/:organizationId/:boqId/sections/:sectionId  → STEP 2, single endpoint for dimensions + material/labour picks
 boqRoutes.patch(
-  "/:organizationId/:boqId/sections/:sectionId/inputs",
+  "/:organizationId/:boqId/sections/:sectionId",
   writeRoles,
-  boqController.saveSectionInputs
+  boqController.updateSectionData
 );
 
 // POST /boq/:organizationId/:boqId/run-engine  → step 3
@@ -60,11 +67,11 @@ boqRoutes.post(
 );
 
 // PATCH /boq/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId  → step 4, manual edit
-boqRoutes.patch(
-  "/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId",
-  writeRoles,
-  boqController.updateLineItem
-);
+// boqRoutes.patch(
+//   "/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId",
+//   writeRoles,
+//   boqController.updateLineItem
+// );
 
 // PATCH .../line-items/:lineItemId/assign-material  → step 4, price via real MaterialItem
 boqRoutes.patch(

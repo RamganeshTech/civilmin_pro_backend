@@ -87,14 +87,19 @@ export const getLabourItemsDropdown = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { organizationId } = req.params;
+    const { organizationId, categoryId } = req.params;
 
     if (!organizationId) {
       res.status(400).json({ ok: false, message: "organizationId is required" });
       return;
     }
 
-    const result = await itemService.getLabourItemsDropdown(organizationId);
+    if (!categoryId) {
+      res.status(400).json({ ok: false, message: "categoryId is required" });
+      return;
+    }
+
+    const result = await itemService.getLabourItemsDropdown(organizationId, categoryId);
 
     res.status(200).json({ ok: true, data: result });
   } catch (error) {

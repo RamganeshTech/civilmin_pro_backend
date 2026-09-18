@@ -172,17 +172,30 @@ export const getSingleItem = async (
   return { item };
 };
 
+export interface ILabourItemDropdown {
+  _id: Types.ObjectId;
+  role: string;
+  skillLevel: string;
+  rate: number;
+  halfDayRate: number;
+  otPerHour: number;
+  refNo?: string;
+}
 
 export const getLabourItemsDropdown = async (
-  organizationId: string
-): Promise<{ items: any[] }> => {
-  const items = await LabourItemModel.find({ organizationId, isActive: true })
-    // Selecting fields necessary for BOQ estimation and UI display
+  organizationId: string,
+  categoryId: string
+): Promise<ILabourItemDropdown[]> => {
+  const items = await LabourItemModel.find({ 
+    organizationId, 
+    categoryId, 
+    isActive: true 
+  })
     .select("role skillLevel rate halfDayRate otPerHour refNo _id")
     .sort({ role: 1 })
     .lean();
 
-  return { items };
+  return items as ILabourItemDropdown[];
 };
 
 export const getInactiveItems = async (

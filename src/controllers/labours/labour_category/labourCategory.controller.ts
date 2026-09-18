@@ -73,7 +73,7 @@ export const getCategoriesForDropdown = async (
 
     const result = await categoryService.getCategoriesForDropdown(organizationId);
 
-    res.status(200).json({ ok: true, data: result.categories });
+    res.status(200).json({ ok: true, data: result });
   } catch (error) {
     next(error);
   }

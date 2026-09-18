@@ -60,7 +60,7 @@ export const getBOQ = async (
 };
 
 // ── STEP 1: CREATE (no boqId) OR UPDATE SECTIONS (with boqId) ───────────────
-export const saveSections = async (
+export const saveSections = async ( // this is getting called in the first step 
     req: RoleBasedRequest,
     res: Response,
     next: NextFunction
@@ -94,7 +94,7 @@ export const saveSections = async (
     }
 };
 
-// ── STEP 2: SAVE DIMENSION INPUTS FOR ONE SECTION ────────────────────────────
+// ── STEP 2: SAVE DIMENSION INPUTS FOR ONE SECTION (no not needed instead ues the updateSectionData) ────────────────────────────
 export const saveSectionInputs = async (
     req: RoleBasedRequest,
     res: Response,
@@ -127,6 +127,46 @@ export const saveSectionInputs = async (
     } catch (error) {
         next(error);
     }
+};
+
+// controller — replaces saveSectionInputs
+export const updateSectionData = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { userId } = req.user!;
+    const { organizationId, boqId, sectionId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+    if (!boqId) {
+      res.status(400).json({ ok: false, message: "boqId is required" });
+      return;
+    }
+    if (!sectionId) {
+      res.status(400).json({ ok: false, message: "sectionId is required" });
+      return;
+    }
+    const { inputs, materialAssignment, labourAssignment } = req.body;
+    if (!inputs && !materialAssignment && !labourAssignment) {
+      res.status(400).json({ ok: false, message: "inputs, materialAssignment, or labourAssignment is required" });
+      return;
+    }
+
+    const result = await boqService.updateSectionData(
+      organizationId, boqId, sectionId,
+      { inputs, materialAssignment, labourAssignment },
+      userId
+    );
+
+    res.status(200).json({ ok: true, data: result, message: "Section updated successfully" });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // ── STEP 3: RUN FORMULA ENGINE ───────────────────────────────────────────────

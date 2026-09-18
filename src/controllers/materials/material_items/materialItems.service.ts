@@ -86,9 +86,10 @@ const assertCategoryIsValid = async (organizationId: string, categoryId: string)
 export const getAllItems = async (
   organizationId: string,
   filters: IItemFilters
-): Promise<{ items: IMaterialItem[]; 
+): Promise<{
+  items: IMaterialItem[];
   // total: number; page: number; limit: number; totalPages: number
- }> => {
+}> => {
   const {
     categoryId,
     status,
@@ -147,7 +148,7 @@ export const getAllItems = async (
   //   totalPages: Math.max(Math.ceil(total / limitNum), 1),
   // };
 
-  return {items: items}
+  return { items: items }
 };
 
 /* ------------------------------------------------------------------ */
@@ -175,16 +176,29 @@ export const getItemById = async (
 };
 
 
+
+
+export interface IMaterialItemDropdown {
+  _id: Types.ObjectId;
+  productName: string;
+  brand: string;
+  unit: string;
+  currentRate: number;
+  refNo: string;
+}
+
+
 export const getMaterialItemsDropdown = async (
-  organizationId: string
-): Promise<{ items: any[] }> => {
-  const items = await MaterialItemModel.find({ organizationId, isActive: true })
+  organizationId: string,
+  categoryId: string
+): Promise<IMaterialItemDropdown[]> => {
+  const items = await MaterialItemModel.find({ organizationId, isActive: true , categoryId})
     // Selecting fields that give context to the user in a dropdown (name, brand, unit, rate)
     .select("productName brand unit currentRate refNo _id")
     .sort({ productName: 1 })
     .lean();
 
-  return { items };
+  return items as IMaterialItemDropdown[];
 };
 
 /* ------------------------------------------------------------------ */
