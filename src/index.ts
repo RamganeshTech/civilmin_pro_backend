@@ -15,6 +15,15 @@ import materialItemRoutes from './routes/material_routes/materialItems.routes.js
 import labourCategoryRoutes from './routes/labour_routes/labourCategory.routes.js';
 import labourItemRoutes from './routes/labour_routes/labourItem.routes.js';
 import boqRoutes from './routes/boq/boq.routes.js';
+import projectClassificationRoutes from './routes/projectClassification_routes/projectClassification.routes.js';
+import evidenceRoutes from './routes/evidence_routes/evidence.routes.js';
+import lifeCycleRoutes from './routes/lifeCycle_routes/lifeCycle.routes.js';
+import appointmentRoutes from './routes/appointment_routes/appointment.routes.js';
+import inspectionLotRoutes from './routes/inspectionLot_routes/inspectionLot.routes.js';
+import controlRoutes from './routes/control_routes/control.routes.js';
+import legalSourceRoutes from './routes/legalSource_routes/legalSource.routes.js';
+import statutoryFormRoutes from './routes/statutoryForm_routes/statutoryForm.routes.js';
+import defectRoutes from './routes/defect_routes/defect.routes.js';
 
 // Load environment variables
 dotenv.config({ path: '.env' });
@@ -70,6 +79,15 @@ app.use("/api/v1/material-items", materialItemRoutes);
 app.use("/api/v1/labour-category", labourCategoryRoutes);
 app.use("/api/v1/labour-items", labourItemRoutes);
 app.use("/api/v1/boq", boqRoutes);
+app.use("/api/project-classification", projectClassificationRoutes);
+app.use("/api/evidence", evidenceRoutes);
+app.use("/api/life-cycle", lifeCycleRoutes);
+app.use("/api/appointment", appointmentRoutes);
+app.use("/api/inspection", inspectionLotRoutes);
+app.use("/api/control", controlRoutes);
+app.use("/api/legalsource", legalSourceRoutes);
+app.use("/api/statutoryform", statutoryFormRoutes);
+app.use("/api/defectRoutes", defectRoutes);
 
 // Health Check (Optional but recommended for EC2 monitoring)
 app.get('/health', (req: Request, res: Response) => {

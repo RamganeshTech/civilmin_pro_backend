@@ -65,6 +65,42 @@ const generateS3Key = (originalName: string, folder: string): string => {
 // };
 
 
+import multer from "multer";
+
+const storage = multer.memoryStorage();
+
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+  "application/pdf",
+  "video/mp4",
+  "video/quicktime",
+  "video/x-msvideo",
+  "video/webm",
+];
+
+const fileFilter = (
+  req: Express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+): void => {
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only images, PDFs and videos are allowed."));
+  }
+};
+
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+});
+
 
 // GIF and SVG must skip sharp's resize/format pipeline —
 // resizing breaks GIF animation, and sharp rasterizes SVG rather than preserving it as vector.
