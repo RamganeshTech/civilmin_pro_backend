@@ -13,13 +13,13 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 
 // GET /material-categories?organizationId=xxx
 materialCategoryRoutes.get(
-  "/:organizationId",
+  "/v1/:organizationId",
   readRoles,
   categoryController.getAllCategories
 );
 
 materialCategoryRoutes.get(
-  "/:organizationId/inactive",
+  "/v1/:organizationId/inactive",
   readRoles,
   categoryController.getInactiveCategories
 );
@@ -33,48 +33,48 @@ materialCategoryRoutes.get(
 // GET /material-categories/:organizationId/dropdown
 // NOTE: Registered BEFORE /:organizationId/:categoryId so "dropdown" is not captured as categoryId
 materialCategoryRoutes.get(
-  "/:organizationId/dropdown",
+  "/v1/:organizationId/dropdown",
   readRoles,
   categoryController.getCategoriesDropdown
 );
 
 // POST /material-categories/:organizationId
 materialCategoryRoutes.post(
-  "/:organizationId",
+  "/v1/:organizationId",
   writeRoles,
   categoryController.createCategory
 );
 
 // GET /material-categories/:organizationId/:categoryId
 materialCategoryRoutes.get(
-  "/:organizationId/:categoryId",
+  "/v1/:organizationId/:categoryId",
   readRoles,
   categoryController.getCategoryById
 );
 
 // PATCH /material-categories/:organizationId/:categoryId
 materialCategoryRoutes.patch(
-  "/:organizationId/:categoryId",
+  "/v1/:organizationId/:categoryId",
   writeRoles,
   categoryController.updateCategory
 );
 
 // DELETE /material-categories/:organizationId/:categoryId
 materialCategoryRoutes.delete(
-  "/:organizationId/:categoryId",
+  "/v1/:organizationId/:categoryId",
   writeRoles,
   categoryController.softDeleteCategory
 );
 
 materialCategoryRoutes.delete(
-  "/:organizationId/:categoryId/hard-delete",
+  "/v1/:organizationId/:categoryId/hard-delete",
   writeRoles,
   categoryController.deleteCategoryFully
 );
 
 
 materialCategoryRoutes.put(
-  "/:organizationId/:categoryId/recover",
+  "/v1/:organizationId/:categoryId/recover",
   writeRoles,
   categoryController.recoverCategory
 );

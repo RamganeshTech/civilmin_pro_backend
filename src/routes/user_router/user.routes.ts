@@ -6,16 +6,16 @@ import { upload } from "../../utils/s3Upload.js";
 
 const userRoutes = Router();
 
-userRoutes.post("/register", register);
-userRoutes.post("/login", login);
-userRoutes.post("/forgot-password", forgotPassword);
-userRoutes.post("/reset-password/:userId/:token", resetPassword);
+userRoutes.post("/v1/register", register);
+userRoutes.post("/v1/login", login);
+userRoutes.post("/v1/forgot-password", forgotPassword);
+userRoutes.post("/v1/reset-password/:userId/:token", resetPassword);
 
 /* ----------------- Protected Routes ------------------- */
 // Authenticated user session
-userRoutes.get("/isauthenticated", multiAuthRole(), userAuthenticated);
-userRoutes.get("/me", multiAuthRole(), getMe);
-userRoutes.post("/logout", multiAuthRole(), logout);
+userRoutes.get("/v1/isauthenticated", multiAuthRole(), userAuthenticated);
+userRoutes.get("/v1/me", multiAuthRole(), getMe);
+userRoutes.post("/v1/logout", multiAuthRole(), logout);
 
 userRoutes.put(
   "/v1/:organizationId/:userId/profile-image",
@@ -25,7 +25,7 @@ userRoutes.put(
 
 // User listing scoped to the organization (e.g. for assigning Site Engineers)
 userRoutes.get(
-  "/",
+  "/v1/",
   multiAuthRole("owner", "admin", "cto", "staff"),
   getAllUsers
 );

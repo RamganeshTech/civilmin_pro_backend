@@ -18,63 +18,63 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 
 // GET /labour-category/:organizationId
 labourCategoryRoutes.get(
-  "/:organizationId",
+  "/v1/:organizationId",
   readRoles,
   categoryController.getAllCategories
 );
 
 // GET /labour-category/:organizationId/dropdown
 labourCategoryRoutes.get(
-  "/:organizationId/dropdown",
+  "/v1/:organizationId/dropdown",
   readRoles,
   categoryController.getCategoriesForDropdown
 );
 
 // GET /labour-category/:organizationId/inactive
 labourCategoryRoutes.get(
-  "/:organizationId/inactive",
+  "/v1/:organizationId/inactive",
   readRoles,
   categoryController.getInactiveCategories
 );
 
 // POST /labour-category/:organizationId
 labourCategoryRoutes.post(
-  "/:organizationId",
+  "/v1/:organizationId",
   writeRoles,
   categoryController.createCategory
 );
 
 // GET /labour-category/:organizationId/:categoryId
 labourCategoryRoutes.get(
-  "/:organizationId/:categoryId",
+  "/v1/:organizationId/:categoryId",
   readRoles,
   categoryController.getCategoryById
 );
 
 // PATCH /labour-category/:organizationId/:categoryId
 labourCategoryRoutes.patch(
-  "/:organizationId/:categoryId",
+  "/v1/:organizationId/:categoryId",
   writeRoles,
   categoryController.updateCategory
 );
 
 // PATCH /labour-category/:organizationId/:categoryId/recover
 labourCategoryRoutes.patch(
-  "/:organizationId/:categoryId/recover",
+  "/v1/:organizationId/:categoryId/recover",
   writeRoles,
   categoryController.recoverCategory
 );
 
 // DELETE /labour-category/:organizationId/:categoryId  (soft delete)
 labourCategoryRoutes.delete(
-  "/:organizationId/:categoryId",
+  "/v1/:organizationId/:categoryId",
   writeRoles,
   categoryController.deleteCategory
 );
 
 // DELETE /labour-category/:organizationId/:categoryId/force  (hard delete)
 labourCategoryRoutes.delete(
-  "/:organizationId/:categoryId/force",
+  "/v1/:organizationId/:categoryId/force",
   writeRoles,
   categoryController.hardDeleteCategory
 );

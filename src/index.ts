@@ -24,6 +24,10 @@ import controlRoutes from './routes/control_routes/control.routes.js';
 import legalSourceRoutes from './routes/legalSource_routes/legalSource.routes.js';
 import statutoryFormRoutes from './routes/statutoryForm_routes/statutoryForm.routes.js';
 import defectRoutes from './routes/defect_routes/defect.routes.js';
+import rateMasterCategoryRoutes from './routes/rate_master_routes/rate_master_category_routes/rateMasterCategory.routes.js';
+import rateMasterItemRoutes from './routes/rate_master_routes/rate_Master_Item_routes/rateMasterItem.routes.js';
+import formulaCategoryRoutes from './routes/formula_routes/formulaCategory.routes.js';
+import formulaItemRoutes from './routes/formula_routes/formulaItem.routes.js';
 
 // Load environment variables
 dotenv.config({ path: '.env' });
@@ -71,14 +75,14 @@ app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'API is running successfully!' });
 });
 
-app.use("/api/v1/auth", userRoutes);
-app.use("/api/v1/organization", organizationRoutes);
-app.use("/api/v1/projects", projectRoutes);
-app.use("/api/v1/material-category", materialCategoryRoutes);
-app.use("/api/v1/material-items", materialItemRoutes);
-app.use("/api/v1/labour-category", labourCategoryRoutes);
-app.use("/api/v1/labour-items", labourItemRoutes);
-app.use("/api/v1/boq", boqRoutes);
+app.use("/api/auth", userRoutes);
+app.use("/api/organization", organizationRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/material-category", materialCategoryRoutes);
+app.use("/api/material-items", materialItemRoutes);
+app.use("/api/labour-category", labourCategoryRoutes);
+app.use("/api/labour-items", labourItemRoutes);
+app.use("/api/boq", boqRoutes);
 app.use("/api/project-classification", projectClassificationRoutes);
 app.use("/api/evidence", evidenceRoutes);
 app.use("/api/life-cycle", lifeCycleRoutes);
@@ -88,6 +92,10 @@ app.use("/api/control", controlRoutes);
 app.use("/api/legalsource", legalSourceRoutes);
 app.use("/api/statutoryform", statutoryFormRoutes);
 app.use("/api/defectRoutes", defectRoutes);
+app.use("/api/rate-master-category", rateMasterCategoryRoutes);
+app.use("/api/rate-master-item", rateMasterItemRoutes);
+app.use("/api/formula-category", formulaCategoryRoutes);
+app.use("/api/formula-item", formulaItemRoutes);
 
 // Health Check (Optional but recommended for EC2 monitoring)
 app.get('/health', (req: Request, res: Response) => {

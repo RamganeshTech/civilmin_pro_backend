@@ -20,21 +20,21 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 
 // GET /labour-items/:organizationId
 labourItemRoutes.get(
-  "/:organizationId",
+  "/v1/:organizationId",
   readRoles,
   itemController.getAllItems
 );
 
 // GET /labour-items/:organizationId/inactive
 labourItemRoutes.get(
-  "/:organizationId/inactive",
+  "/v1/:organizationId/inactive",
   readRoles,
   itemController.getInactiveItems
 );
 
 
 labourItemRoutes.get(
-  "/:organizationId/:categoryId/dropdown",
+  "/v1/:organizationId/:categoryId/dropdown",
   readRoles,
   itemController.getLabourItemsDropdown
 );
@@ -42,49 +42,49 @@ labourItemRoutes.get(
 
 // POST /labour-items/:organizationId
 labourItemRoutes.post(
-  "/:organizationId",
+  "/v1/:organizationId",
   writeRoles,
   itemController.createItem
 );
 
 // PATCH /labour-items/:organizationId/recover  (bulk recover)
 labourItemRoutes.patch(
-  "/:organizationId/recover",
+  "/v1/:organizationId/recover",
   writeRoles,
   itemController.recoverItems
 );
 
 // GET /labour-items/:organizationId/:itemId
 labourItemRoutes.get(
-  "/:organizationId/:itemId",
+  "/v1/:organizationId/:itemId",
   readRoles,
   itemController.getSingleItem
 );
 
 // PATCH /labour-items/:organizationId/:itemId
 labourItemRoutes.patch(
-  "/:organizationId/:itemId",
+  "/v1/:organizationId/:itemId",
   writeRoles,
   itemController.updateItem
 );
 
 // PATCH /labour-items/:organizationId/:itemId/recover  (single recover)
 labourItemRoutes.patch(
-  "/:organizationId/:itemId/recover",
+  "/v1/:organizationId/:itemId/recover",
   writeRoles,
   itemController.recoverItem
 );
 
 // DELETE /labour-items/:organizationId/:itemId  (soft delete)
 labourItemRoutes.delete(
-  "/:organizationId/:itemId",
+  "/v1/:organizationId/:itemId",
   writeRoles,
   itemController.deleteItem
 );
 
 // DELETE /labour-items/:organizationId/:itemId/force  (hard delete)
 labourItemRoutes.delete(
-  "/:organizationId/:itemId/force",
+  "/v1/:organizationId/:itemId/force",
   writeRoles,
   itemController.hardDeleteItem
 );

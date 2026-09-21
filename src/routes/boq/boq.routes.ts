@@ -18,7 +18,7 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 
 // GET /boq/:organizationId/:boqId
 boqRoutes.get(
-  "/:organizationId",
+  "/v1/:organizationId",
   readRoles,
   boqController.getAllBOQ
 );
@@ -26,63 +26,63 @@ boqRoutes.get(
 
 // GET /boq/:organizationId/:boqId
 boqRoutes.get(
-  "/:organizationId/:boqId",
+  "/v1/:organizationId/:boqId",
   readRoles,
   boqController.getBOQ
 );
 
 // POST /boq/:organizationId/:projectId  → create new draft (step 1, no boqId yet)
 boqRoutes.post(
-  "/:organizationId/:projectId",
+  "/v1/:organizationId/:projectId",
   writeRoles,
   boqController.saveSections
 );
 
 // PATCH /boq/:organizationId/:boqId/sections  → update selected sections (step 1, existing draft)
 boqRoutes.patch(
-  "/:organizationId/:boqId/sections",
+  "/v1/:organizationId/:boqId/sections",
   writeRoles,
   boqController.saveSections
 );
 
 // PATCH /boq/:organizationId/:boqId/sections/:sectionId/inputs  → step 2
 // boqRoutes.patch(
-//   "/:organizationId/:boqId/sections/:sectionId/inputs",
+//v1/   "/:organizationId/:boqId/sections/:sectionId/inputs",
 //   writeRoles,
 //   boqController.saveSectionInputs
 // );
 
 // PATCH /boq/:organizationId/:boqId/sections/:sectionId  → STEP 2, single endpoint for dimensions + material/labour picks
 boqRoutes.patch(
-  "/:organizationId/:boqId/sections/:sectionId",
+  "/v1/:organizationId/:boqId/sections/:sectionId",
   writeRoles,
   boqController.updateSectionData
 );
 
 // POST /boq/:organizationId/:boqId/run-engine  → step 3
 boqRoutes.post(
-  "/:organizationId/:boqId/run-engine",
+  "/v1/:organizationId/:boqId/run-engine",
   writeRoles,
   boqController.runEngine
 );
 
 // PATCH /boq/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId  → step 4, manual edit
 // boqRoutes.patch(
-//   "/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId",
+//v1/   "/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId",
 //   writeRoles,
 //   boqController.updateLineItem
 // );
 
 // PATCH .../line-items/:lineItemId/assign-material  → step 4, price via real MaterialItem
 boqRoutes.patch(
-  "/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId/assign-material",
+  "/v1/:organizationId/:boqId/sections/:sectionId/line-items/:lineItemId/assign-material",
   writeRoles,
   boqController.assignMaterial
 );
 
 // PATCH .../labours/:labourRowId/assign-labour  → step 4, price via real LabourItem
 boqRoutes.patch(
-  "/:organizationId/:boqId/sections/:sectionId/labours/:labourRowId/assign-labour",
+  "/v1/:organizationId/:boqId/sections/:sectionId/labours/:labourRowId/assign-labour",
   writeRoles,
   boqController.assignLabour
 );

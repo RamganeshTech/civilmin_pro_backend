@@ -15,13 +15,13 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 
 // GET /organizations/:organizationId/material-items
 materialItemRoutes.get(
-  "/:organizationId",
+  "/v1/:organizationId",
   readRoles,
   itemController.getAllItems
 );
 
 materialItemRoutes.get(
-  "/:organizationId/inactive",
+  "/v1/:organizationId/inactive",
   readRoles,
   itemController.getInactiveItems
 );
@@ -31,7 +31,7 @@ materialItemRoutes.get(
 
 // POST /organizations/:organizationId/material-items
 materialItemRoutes.post(
-  "/:organizationId",
+  "/v1/:organizationId",
   writeRoles,
   itemController.createItem
 );
@@ -39,14 +39,14 @@ materialItemRoutes.post(
 
 
 materialItemRoutes.patch(
-  "/:organizationId/recover",
+  "/v1/:organizationId/recover",
   writeRoles,
   itemController.recoverItems
 );
 
 
 materialItemRoutes.get(
-  "/:organizationId/:categoryId/dropdown",
+  "/v1/:organizationId/:categoryId/dropdown",
   readRoles,
   itemController.getMaterialItemsDropdown
 );
@@ -54,21 +54,21 @@ materialItemRoutes.get(
 
 // GET /organizations/:organizationId/material-items/:itemId
 materialItemRoutes.get(
-  "/:organizationId/:itemId",
+  "/v1/:organizationId/:itemId",
   readRoles,
   itemController.getItemById
 );
 
 // PATCH /organizations/:organizationId/material-items/:itemId
 materialItemRoutes.patch(
-  "/:organizationId/:itemId",
+  "/v1/:organizationId/:itemId",
   writeRoles,
   itemController.updateItem
 );
 
 // DELETE /organizations/:organizationId/material-items/:itemId
 materialItemRoutes.delete(
-  "/:organizationId/:itemId",
+  "/v1/:organizationId/:itemId",
   writeRoles,
   itemController.deleteItem
 );
@@ -76,7 +76,7 @@ materialItemRoutes.delete(
 
 
 materialItemRoutes.delete(
-  "/:organizationId/:itemId/hard-delete",
+  "/v1/:organizationId/:itemId/hard-delete",
   writeRoles,
   itemController.hardDeleteItem
 );
@@ -84,7 +84,7 @@ materialItemRoutes.delete(
 
 
 materialItemRoutes.put(
-  "/:organizationId/:itemId/recover",
+  "/v1/:organizationId/:itemId/recover",
   writeRoles,
   itemController.recoverItem
 );
