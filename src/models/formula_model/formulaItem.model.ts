@@ -41,6 +41,7 @@ export interface IFormulaItem extends Document {
   organizationId: Types.ObjectId;
   categoryId: Types.ObjectId;
 
+
   refNo: string; // auto-generated, e.g. FI-001, scoped per organizationId
   formulaCode: string | null; // auto-generated per category, e.g. "CONV-01" (prefix from category's categoryKey)
 
@@ -48,6 +49,7 @@ export interface IFormulaItem extends Document {
   type: string | null; // e.g. "Conversion", "Material", "Thumb Rule" — free text, not enum
   confidence: IFormulaConfidence;
 
+  costCalculatorCategoryKey: string | null; // tags this formula as the auto-selected one for a specific Cost Calculator wizard category (e.g. "brickwork"); null for formulas not wired to the wizard
   reference: string | null; // e.g. "IS 269:2015", "SI definition"
   unit: string | null;
 
@@ -118,6 +120,8 @@ const FormulaItemSchema = new Schema<IFormulaItem>(
     name: { type: String, default: null },
     type: { type: String, default: null },
     confidence: { type: String, enum: FORMULA_CONFIDENCE, default: "Verify" },
+
+    costCalculatorCategoryKey: { type: String, default: null },
 
     reference: { type: String, default: null },
     unit: { type: String, default: null },
@@ -190,6 +194,10 @@ FormulaItemSchema.pre("save", async function (this: IFormulaItem) {
 });
 
 FormulaItemSchema.index({ organizationId: 1, categoryId: 1 });
+// FormulaItemSchema.index(
+//   { organizationId: 1, costCalculatorCategoryKey: 1 },
+//   { unique: true, partialFilterExpression: { costCalculatorCategoryKey: { $type: "string" }, isActive: true } }
+// );
 // FormulaItemSchema.index({ organizationId: 1, confidence: 1 });
 // FormulaItemSchema.index({ name: "text", example: "text", note: "text", tags: "text" });
 

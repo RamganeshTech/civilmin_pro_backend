@@ -123,6 +123,7 @@ export const initializeFormulaLibrary = async (
       organizationId,
       categoryId,
       formulaCode: item.formulaCode,
+      costCalculatorCategoryKey: item.costCalculatorCategoryKey, // NEW — wires 18 of the 19 wizard categories automatically on init
       name: item.name,
       type: item.type,
       confidence: item.confidence,
@@ -181,7 +182,7 @@ export const getAllCategories = async (
     isActive: true,
   }).sort({ createdAt: -1 });
 
-  return categories ;
+  return categories;
 };
 
 export const getCategoryById = async (
@@ -273,7 +274,7 @@ export const getInactiveCategories = async (
     isActive: false,
   }).sort({ updatedAt: -1 });
 
-  return categories ;
+  return categories;
 };
 
 // Minimal dropdown view — active categories, _id + categoryName only.
@@ -285,7 +286,7 @@ export const getCategoryDropdown = async (
     { _id: 1, categoryName: 1 }
   ).sort({ categoryName: 1 });
 
-  return categories ;
+  return categories;
 };
 
 

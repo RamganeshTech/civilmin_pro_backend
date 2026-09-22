@@ -202,6 +202,24 @@ const validatePayload = async (
   assertValidVariables(payload.variables);
   assertValidCalcInputs(payload.calcInputs);
   assertValidCalcOutputs(payload.calcOutputs);
+  assertValidConfidence(payload.confidence);
+};
+
+
+const COST_CALCULATOR_FORMULA_CATEGORY_KEYS = [
+  "brickwork", "concrete", "plastering", "steel", "foundation", "flooring",
+  "waterproof", "paint", "rccSlab", "rccColumn", "rccBeam", "staircase",
+  "drainage", "septic", "earthwork", "electrical", "aac", "thumbrule", "compound",
+] as const;
+
+const assertValidCostCalculatorCategoryKey = (key?: string | null): void => {
+  if (key === undefined || key === null) return; // optional field, null is fine
+  if (!COST_CALCULATOR_FORMULA_CATEGORY_KEYS.includes(key as never)) {
+    throw new ApiError(
+      400,
+      `costCalculatorCategoryKey must be one of: ${COST_CALCULATOR_FORMULA_CATEGORY_KEYS.join(", ")}`
+    );
+  }
 };
 
 const getEditableItem = async (
