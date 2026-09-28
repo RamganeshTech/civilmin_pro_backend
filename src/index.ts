@@ -72,7 +72,7 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 
 // Basic Route
-app.get('/', (req: Request, res: Response) => {
+app.get('/api/', (req: Request, res: Response) => {
   res.json({ message: 'API is running successfully!' });
 });
 
@@ -104,7 +104,7 @@ app.use("/api/formula-item", formulaItemRoutes);
 app.use("/api/cost-calculator", costCalculatorRoutes);
 
 // Health Check (Optional but recommended for EC2 monitoring)
-app.get('/health', (req: Request, res: Response) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'active', message: 'server running', timestamp: new Date().toISOString() });
 });
 
