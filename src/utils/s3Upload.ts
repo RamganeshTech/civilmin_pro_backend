@@ -15,10 +15,13 @@ export interface IUploadedFile {
 }
 
 // Generate a unique S3 key inside a folder
-const generateS3Key = (originalName: string, folder: string): string => {
-  const ext = path.extname(originalName);
+// const generateS3Key = (folder: string, extension: string): string => {
+// const generateS3Key = (originalName: string, folder: string): string => {
+const generateS3Key = (folder: string, extension: string): string => {
+
+  // const extension = path.extname(originalName);
   const uniqueId = uuidv4();
-  return `${folder}/${uniqueId}${ext}`;
+  return `${folder}/${uniqueId}${extension}`;
 };
 
 

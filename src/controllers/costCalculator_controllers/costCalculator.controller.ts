@@ -2,6 +2,34 @@ import { type Response,  type NextFunction } from "express";
 import * as costCalculatorService from "./costCalculator.service.js"; // TODO confirm path
 import type { RoleBasedRequest } from "../../utils/utils.js";
 
+
+export const getAllCostCalculators = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { organizationId } = req.params;
+    const { projectId, status } = req.query;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+
+    const result = await costCalculatorService.getAllCostCalculators(organizationId, {
+      projectId,
+      status,
+    });
+
+    res
+      .status(200)
+      .json({ ok: true, data: result, message: "Cost calculators fetched successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getCostCalculatorById = async (
   req: RoleBasedRequest,
   res: Response,
@@ -86,6 +114,39 @@ export const saveCategorySelection = async (
     const result = await costCalculatorService.saveSectionDetails(organizationId, userId, req.body);
 
     res.status(200).json({ ok: true, data: result, message: "Section saved successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+export const approveCostCalculator = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { userId } = req.user!;
+    const { organizationId, costCalculatorId } = req.params;
+
+    if (!organizationId) {
+      res.status(400).json({ ok: false, message: "organizationId is required" });
+      return;
+    }
+    if (!costCalculatorId) {
+      res.status(400).json({ ok: false, message: "costCalculatorId is required" });
+      return;
+    }
+
+    const result = await costCalculatorService.approveCostCalculator(
+      organizationId,
+      userId,
+      costCalculatorId,
+      req.body
+    );
+
+    res.status(200).json({ ok: true, data: result, message: "Cost calculator approved successfully" });
   } catch (error) {
     next(error);
   }

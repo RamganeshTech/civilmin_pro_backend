@@ -45,7 +45,7 @@ const checklistItemSchema = new Schema<IGateChecklistItem>(
     label: { type: String, required: true },
     checked: { type: Boolean, default: false },
   },
-  { _id: false }
+  { _id: true }
 );
 
 const signOffSchema = new Schema<IGateSignOff>(

@@ -1,6 +1,12 @@
-import { CostCalculatorModel, type ICostCalculator, type  ICostCalcSection, type ICostCalcLineItem } from "../../models/costCalculator_model/costCalculator.model.js";
+import { CostCalculatorModel, type ICostCalculator, type  ICostCalcSection, type ICostCalcLineItem, COST_CALC_STATUS } from "../../models/costCalculator_model/costCalculator.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import { Types } from "mongoose";
+
+
+import { evaluate } from "mathjs"; // new dependency — npm install mathjs
+import { FormulaItemModel } from "../../models/formula_model/formulaItem.model.js";
+import { RateMasterItemModel } from "../../models/rate_master_models/rateMaster.model.js";
+
 
 // Shared helper — reused by every step's service (category selection now,
 // dimensions/formula-engine/line-items later). Same pattern as BOQ's
@@ -22,6 +28,37 @@ export const getEditableCostCalculator = async (
   }
 
   return costCalculator;
+};
+
+
+
+export interface IGetAllCostCalculatorsFilters {
+  projectId?: string;
+  status?: string;
+}
+
+export const getAllCostCalculators = async (
+  organizationId: string,
+  filters?: IGetAllCostCalculatorsFilters
+): Promise<{ costCalculators: ICostCalculator[] }> => {
+  const query: Record<string, unknown> = { organizationId };
+
+  if (filters?.projectId) {
+    assertValidObjectId(filters.projectId, "projectId");
+    query.projectId = filters.projectId;
+  }
+  if (filters?.status) {
+    if (!COST_CALC_STATUS.includes(filters.status as never)) {
+      throw new ApiError(400, `status must be one of: ${COST_CALC_STATUS.join(", ")}`);
+    }
+    query.status = filters.status;
+  }
+
+  // List view stays lean — no populate here (that's what getCostCalculatorById
+  // is for). Sections still come back, just with raw ids, not full docs.
+  const costCalculators = await CostCalculatorModel.find(query).sort({ createdAt: -1 });
+
+  return { costCalculators };
 };
 
 export const getCostCalculatorById = async (
@@ -160,11 +197,6 @@ export const saveCategorySelection = async (
 
 //  STEP 2 FOR SVING THE DATA IN EACH CATEGORY
 
-
-import { evaluate } from "mathjs"; // new dependency — npm install mathjs
-import { FormulaItemModel } from "../../models/formula_model/formulaItem.model.js";
-import { RateMasterItemModel } from "../../models/rate_master_models/rateMaster.model.js";
-
 export interface ISaveSectionDetailsInput {
   costCalculatorId: string;
   sectionId: string;
@@ -283,6 +315,66 @@ export const saveSectionDetails = async (
   section.sectionTotal = section.lineItems.reduce((sum:number, li:ICostCalcLineItem) => sum + li.amount, 0);
   costCalculator.grandTotal = costCalculator.sections.reduce((sum, s) => sum + s.sectionTotal, 0);
   costCalculator.updatedBy = new Types.ObjectId(userId);
+  await costCalculator.save();
+
+  return { costCalculator };
+};
+
+
+
+
+
+
+//  for step 4 (APPROVAL)
+
+export interface IApproveCostCalculatorInput {
+  approvalNotes?: string;
+  builtUpAreaSqft?: number; // optional — needed to compute perSqftRate at all
+}
+
+const FORMULA_DRIVEN_WIZARD_KEYS = [
+  "brickwork", "concrete", "plastering", "steel", "foundation", "flooring",
+  "waterproof", "paint", "rccSlab", "rccColumn", "rccBeam", "staircase",
+  "drainage", "septic", "earthwork", "electrical", "aac", "thumbrule", "compound",
+];
+
+export const approveCostCalculator = async (
+  organizationId: string,
+  approvedBy: string,
+  costCalculatorId: string,
+  payload: IApproveCostCalculatorInput
+): Promise<{ costCalculator: ICostCalculator }> => {
+  const costCalculator = await getEditableCostCalculator(organizationId, costCalculatorId);
+
+  if (costCalculator.sections.length === 0 || costCalculator.grandTotal <= 0) {
+    throw new ApiError(400, "Cannot approve an estimate with no line items");
+  }
+
+  const warnings: string[] = [];
+
+  for (const section of costCalculator.sections) {
+    const isFormulaDrivenCategory = FORMULA_DRIVEN_WIZARD_KEYS.includes(section.categoryKey);
+    if (isFormulaDrivenCategory && !section.formulaItemId) {
+      warnings.push(
+        `"${section.categoryLabel}" has no matching formula — quantity was entered manually, verify it`
+      );
+    }
+  }
+
+  let perSqftRate: number | null = null;
+  if (payload.builtUpAreaSqft && payload.builtUpAreaSqft > 0) {
+    perSqftRate = costCalculator.grandTotal / payload.builtUpAreaSqft;
+  } else {
+    warnings.push("perSqftRate not computed — builtUpAreaSqft was not provided at approval");
+  }
+
+  costCalculator.status = "approved";
+  costCalculator.approvedBy = approvedBy;
+  costCalculator.approvedAt = new Date();
+  costCalculator.approvalNotes = payload.approvalNotes || null;
+  costCalculator.perSqftRate = perSqftRate;
+  costCalculator.warnings = warnings;
+
   await costCalculator.save();
 
   return { costCalculator };
