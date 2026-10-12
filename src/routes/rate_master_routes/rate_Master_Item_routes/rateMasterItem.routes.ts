@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as itemController from "../../../controllers/rate_master_controllers/rate_master_item/rateMasterItem.controller.js"; // TODO confirm path
 import { multiAuthRole } from "../../../middleware/auth.middleware.js";
+import { upload } from "../../../utils/s3Upload.js";
 
 
 const rateMasterItemRoutes = Router();
@@ -25,6 +26,17 @@ rateMasterItemRoutes.get("/v1/:organizationId/:itemId", readRoles, itemControlle
 
 // PATCH /rate-master-items/v1/:organizationId/:itemId
 rateMasterItemRoutes.patch("/v1/:organizationId/:itemId", writeRoles, itemController.updateItem);
+
+
+
+rateMasterItemRoutes.put(
+  "/v1/:itemId/image",
+  writeRoles,
+  upload.single("file"),
+  itemController.updateImage
+);
+
+
 
 // PATCH /rate-master-items/v1/:organizationId/:itemId/deactivate
 rateMasterItemRoutes.patch(

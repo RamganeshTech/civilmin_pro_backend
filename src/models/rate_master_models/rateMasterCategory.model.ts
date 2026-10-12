@@ -32,6 +32,8 @@ const RateMasterCategorySchema = new Schema<IRateMasterCategory>(
     refNo: { type: String, default: null },
     categoryName: { type: String, default: null },
 
+    
+
     isActive: { type: Boolean, default: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "UserModel", default: null },
     updatedBy: { type: Schema.Types.ObjectId, ref: "UserModel", default: null },

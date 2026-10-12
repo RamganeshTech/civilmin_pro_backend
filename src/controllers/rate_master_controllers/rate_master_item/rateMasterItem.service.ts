@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import { RATE_MASTER_CONFIDENCE, RATE_MASTER_STATUS, RATE_MASTER_UNITS, RateMasterItemModel, type IRateMasterConfidence, type IRateMasterItem, type IRateMasterStatus, type IRateMasterUnit } from "../../../models/rate_master_models/rateMaster.model.js";
 import { ApiError } from "../../../utils/apiError.js";
 import { pickFields } from "../../../utils/utils.js";
+import { uploadFileToS3 } from "../../../utils/s3Upload.js";
 // import {
 //   RateMasterItemModel,
 //   IRateMasterItem,
@@ -222,6 +223,37 @@ export const updateItem = async (
 
     return { item };
 };
+
+
+
+export const updateImage = async (
+  itemId: string,
+  file: Express.Multer.File
+): Promise<{ rateMasterItem: IRateMasterItem }> => {
+  if (!file.mimetype.startsWith("image/")) {
+    throw new ApiError(400, "Only image files are allowed for profile image");
+  }
+
+  const rateMasterItem = await RateMasterItemModel.findById(itemId);
+  if (!rateMasterItem) {
+    throw new ApiError(404, "Item not found");
+  }
+
+  const uploadedData = await uploadFileToS3(file);
+
+  rateMasterItem.image = {
+    type: "image",
+    key: uploadedData.key,
+    url: uploadedData.url,
+    originalName: uploadedData.originalName,
+    uploadedAt: uploadedData.uploadedAt,
+  };
+
+  await rateMasterItem.save();
+
+  return { rateMasterItem };
+};
+
 
 // Soft delete — flips isActive to false, record stays in the collection.
 export const softDeleteItem = async (

@@ -1,4 +1,5 @@
 import { Schema, model, Types, Document } from "mongoose";
+import type { IUpload } from "../user_models/user.model.js";
 
 /**
  * Rate Master — the "Rate Card" module.
@@ -26,7 +27,8 @@ export interface IRateMasterItem extends Document {
 
   refNo: string; // auto-generated, e.g. RATE-001, scoped per organizationId
 
-//   category: string;               // e.g. "Brick & Block Masonry" — display grouping only
+  image: IUpload
+  //   category: string;               // e.g. "Brick & Block Masonry" — display grouping only
   categoryId: Types.ObjectId;     // ref RateMasterCategoryModel
   sourceCategory: string | null;  // e.g. "Masonry" / "Expanded 2026 database"
 
@@ -56,6 +58,18 @@ export interface IRateMasterItem extends Document {
   updatedAt: Date;
 }
 
+
+
+
+export const uploadSchema = new Schema<IUpload>({
+  type: { type: String, enum: ["image"] },
+  key: { type: String, },
+  url: { type: String, },
+  originalName: String,
+  uploadedAt: { type: Date, default: new Date() }
+}, { _id: true });
+
+
 const RateMasterItemSchema = new Schema<IRateMasterItem>(
   {
     organizationId: {
@@ -64,10 +78,12 @@ const RateMasterItemSchema = new Schema<IRateMasterItem>(
       required: true,
     },
 
+    image: {type:uploadSchema, default: null},
+
     refNo: { type: String, default: null },
 
     // category: { type: String, default: null },
-     categoryId: {
+    categoryId: {
       type: Schema.Types.ObjectId,
       ref: "RateMasterCategoryModel",
       default: null,

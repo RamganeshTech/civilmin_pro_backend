@@ -108,6 +108,39 @@ export const updateItem = async (
   }
 };
 
+
+
+export const updateImage = async (
+  req: RoleBasedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { itemId } = req.params;
+    const file = req.file;
+
+    if (!itemId) {
+      res.status(400).json({ ok: false, message: "itemId is required" });
+      return;
+    }
+    // if (!userId) {
+    //   res.status(400).json({ ok: false, message: "userId is required" });
+    //   return;
+    // }
+    if (!file) {
+      res.status(400).json({ ok: false, message: "file is required" });
+      return;
+    }
+
+    const result = await itemService.updateImage(itemId, file);
+
+    res.status(200).json({ ok: true, data: result, message: "Logo updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 // Soft delete — sets isActive: false, record is kept.
 export const softDeleteItem = async (
   req: RoleBasedRequest,
