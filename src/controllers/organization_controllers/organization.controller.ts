@@ -79,17 +79,17 @@ export const updateOrganizationImage = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { organizationId, userId } = req.params;
+    const { organizationId } = req.params;
     const file = req.file;
 
     if (!organizationId) {
       res.status(400).json({ ok: false, message: "organizationId is required" });
       return;
     }
-    if (!userId) {
-      res.status(400).json({ ok: false, message: "userId is required" });
-      return;
-    }
+    // if (!userId) {
+    //   res.status(400).json({ ok: false, message: "userId is required" });
+    //   return;
+    // }
     if (!file) {
       res.status(400).json({ ok: false, message: "file is required" });
       return;
