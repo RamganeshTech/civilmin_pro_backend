@@ -56,7 +56,7 @@ const signOffSchema = new Schema<IGateSignOff>(
     actorReg: { type: String, required: true },
     signedAt: { type: Date, required: true },
   },
-  { _id: false }
+  { _id: true }
 );
 
 const lifeCycleSchema = new Schema<ILifeCycle>(

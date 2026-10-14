@@ -35,7 +35,7 @@ const signOffSchema = new Schema<ILotSignOff>(
     actorReg: { type: String, required: true },
     signedAt: { type: Date, required: true },
   },
-  { _id: false }
+  { _id: true }
 );
 
 const inspectionLotSchema = new Schema<IInspectionLot>(
@@ -50,7 +50,7 @@ const inspectionLotSchema = new Schema<IInspectionLot>(
     criteriaRef: { type: String, default: null },
     status: { type: String, enum: ["DRAFT", "RELEASED", "BLOCKED"], default: "DRAFT" },
     notes: { type: String, default: null },
-    evidenceIds: [{ type: Schema.Types.ObjectId, ref: "EvidenceModel" }],
+    evidenceIds: [{ type: Schema.Types.ObjectId, ref: "EvidenceModel", default: null }],
     signOff: { type: signOffSchema, default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: "UserModel", required: true },
     isActive: { type: Boolean, default: true },

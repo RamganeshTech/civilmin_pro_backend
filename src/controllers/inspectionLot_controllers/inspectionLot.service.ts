@@ -1,7 +1,4 @@
 import { isValidObjectId } from "mongoose";
-// import { ApiError } from "../utils/apiError.js";
-// import { pickFields } from "../utils/pickFields.js";
-// import { ProjectModel } from "../project_controllers/project.model.js";
 import { assertRoleIsAuthorizedSigner } from "../appointment_controllers/appointment.service.js";
 import { ApiError } from "../../utils/apiError.js";
 import { InspectionLotModel, type IInspectionLot } from "../../models/inspection_model/inspectionLot.model.js";
