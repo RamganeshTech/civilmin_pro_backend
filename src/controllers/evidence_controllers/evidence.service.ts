@@ -123,7 +123,7 @@ export const getEvidenceList = async (
   projectId: string,
   contextKind?: string,
   contextRefId?: string
-): Promise<{ evidenceList: IEvidence[] }> => {
+): Promise<IEvidence[]> => {
   await assertProjectBelongsToOrg(organizationId, projectId);
 
   const filter: Record<string, unknown> = { organizationId, projectId, isActive: true };
@@ -134,7 +134,7 @@ export const getEvidenceList = async (
     .populate("uploadedBy", "_id userName")
     .sort({ createdAt: -1 });
 
-  return { evidenceList };
+  return  evidenceList ;
 };
 
 export const getEvidenceById = async (

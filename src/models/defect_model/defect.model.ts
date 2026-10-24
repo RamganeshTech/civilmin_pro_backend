@@ -32,34 +32,34 @@ export interface IDefectHistoryEntry {
     color: DefectHistoryColor;
 }
 export interface IDefect {
-  organizationId: Types.ObjectId;
-  projectId: Types.ObjectId;
+    organizationId: Types.ObjectId;
+    projectId: Types.ObjectId;
 
-  defectNo: string;
+    defectNo: string;
 
-  stage: string | null;
-  location: string | null;
-  description: string | null;
-  govtCode: string | null;
+    stage: string | null;
+    location: string | null;
+    description: string | null;
+    govtCode: string | null;
 
-  severity: DefectSeverity;
-  status: DefectStatus;
+    severity: DefectSeverity;
+    status: DefectStatus;
 
-  assignedTo: {
-    userId: Types.ObjectId | null;
-    name: string;
-  };
+    assignedTo: {
+        userId: Types.ObjectId | null;
+        name: string;
+    };
 
-  dueDate: Date;
-  raisedBy: Types.ObjectId;
-  raisedOn: Date;
-  closedOn: Date | null;
+    dueDate: Date;
+    raisedBy: Types.ObjectId;
+    raisedOn: Date;
+    closedOn: Date | null;
 
-  media: IDefectMedia;
-  history: IDefectHistoryEntry[];
+    media: IDefectMedia;
+    history: IDefectHistoryEntry[];
 
-  createdBy: Types.ObjectId;
-  isActive: boolean;
+    createdBy: Types.ObjectId;
+    isActive: boolean;
 }
 
 const actorSchema = new Schema<IDefectActor>(
@@ -116,7 +116,11 @@ const defectSchema = new Schema<IDefect>(
         severity: { type: String, enum: ["Critical", "Major", "Minor"], required: true },
         status: { type: String, enum: ["open", "inprogress", "rectified", "closed"], default: "open" },
 
-        assignedTo: { type: String, required: true, trim: true },
+        // assignedTo: { type: String, required: true, trim: true },
+        assignedTo: {
+            userId: { type: Schema.Types.ObjectId, ref: 'UserModel', default: null },
+            name: { type: String, default: null }
+        },
 
         dueDate: { type: Date, required: true },
         raisedBy: { type: Schema.Types.ObjectId, ref: "UserModel", required: true },

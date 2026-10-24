@@ -72,7 +72,7 @@ const lifeCycleSchema = new Schema<ILifeCycle>(
     naReason: { type: String, default: null },
 
     checklist: { type: [checklistItemSchema], default: [] },
-    evidenceIds: [{ type: Schema.Types.ObjectId, ref: "EvidenceModel" }],
+    evidenceIds: { type: [Schema.Types.ObjectId], ref: "EvidenceModel" , default: []},
     notes: { type: String, default: null },
 
     status: { type: String, enum: ["DRAFT", "LOCKED", "REVIEW_REQUIRED"], default: "DRAFT" },

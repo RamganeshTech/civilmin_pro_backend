@@ -9,15 +9,15 @@ export type IMaterialItemStatus = "Active" | "Inactive" | "Discontinued";
 
 export type IRateChangeDirection = "increase" | "decrease" | "no_change";
 
-// export type IRateSourceType = "Vendor" | "Market Survey" | "Government Rate" | "Manual Entry" | "Other";
 export const MATERIAL_UNITS: IMaterialUnit[] = [
     "Bag" , "Kg" , "Ton" , "Cft" , "Cum" , "Sqft" , "Sqm",
     "Rft" , "Nos" , "Litre" , "Load" , "Bundle" , "Roll", "Box"]; 
-
-export interface IMaterialItem extends Document {
-    organizationId: Types.ObjectId;
-    categoryId: Types.ObjectId; // ref to MaterialCategoryModel
-
+    
+// export type IRateSourceType = "Vendor" | "Market Survey" | "Government Rate" | "Manual Entry" | "Other";
+    export interface IMaterialItem extends Document {
+        organizationId: Types.ObjectId;
+        categoryId: Types.ObjectId; // ref to MaterialCategoryModel
+        
     // Basic Info
     productName: string; // e.g. "Red Clay Brick", "TMT Bar 12mm"
     brand?: string; // e.g. "Tata Tiscon" - optional, not every material has a brand

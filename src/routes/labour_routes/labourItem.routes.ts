@@ -21,7 +21,7 @@ const writeRoles = multiAuthRole("owner", "admin", "cto");
 // GET /labour-items/:organizationId
 labourItemRoutes.get(
   "/v1/:organizationId",
-  readRoles,
+  // readRoles,
   itemController.getAllItems
 );
 
